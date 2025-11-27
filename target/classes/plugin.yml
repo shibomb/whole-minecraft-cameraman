@@ -1,0 +1,13 @@
+name: Cameraman
+version: '1.0-SNAPSHOT'
+main: com.shibomb.cameraman.CameramanPlugin
+api-version: '1.20'
+commands:
+  cameraman:
+    description: Control the cameraman
+    usage: /<command> [set|target|newcomer|rotation]
+    permission: cameraman.use
+permissions:
+  cameraman.use:
+    description: Allows use of cameraman commands
+    default: op
