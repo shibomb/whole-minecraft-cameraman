@@ -1,0 +1,5 @@
+# Cameraman Plugin Configuration
+
+# The UUID of the current cameraman.
+# This is automatically updated when /cameraman set is used.
+cameraman: ""
