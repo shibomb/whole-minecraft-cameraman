@@ -1,5 +1,5 @@
-/Users/shibomb/Documents/projects/whole-minecraft-cameraman/src/main/java/com/shibomb/cameraman/CameramanPlugin.java
-/Users/shibomb/Documents/projects/whole-minecraft-cameraman/src/main/java/com/shibomb/cameraman/PlayerJoinListener.java
-/Users/shibomb/Documents/projects/whole-minecraft-cameraman/src/main/java/com/shibomb/cameraman/CameramanCommand.java
-/Users/shibomb/Documents/projects/whole-minecraft-cameraman/src/main/java/com/shibomb/cameraman/CameramanManager.java
-/Users/shibomb/Documents/projects/whole-minecraft-cameraman/src/main/java/com/shibomb/cameraman/RotationTask.java
+/Users/shibomb/Documents/projects/whole-minecraft-cameraman/src/main/java/xyz/shibomb/cameraman/RotationTask.java
+/Users/shibomb/Documents/projects/whole-minecraft-cameraman/src/main/java/xyz/shibomb/cameraman/CameramanManager.java
+/Users/shibomb/Documents/projects/whole-minecraft-cameraman/src/main/java/xyz/shibomb/cameraman/CameramanCommand.java
+/Users/shibomb/Documents/projects/whole-minecraft-cameraman/src/main/java/xyz/shibomb/cameraman/CameramanPlugin.java
+/Users/shibomb/Documents/projects/whole-minecraft-cameraman/src/main/java/xyz/shibomb/cameraman/PlayerJoinListener.java

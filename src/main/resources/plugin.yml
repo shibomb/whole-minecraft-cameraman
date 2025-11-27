@@ -1,6 +1,6 @@
 name: Cameraman
 version: '${project.version}'
-main: com.shibomb.cameraman.CameramanPlugin
+main: xyz.shibomb.cameraman.CameramanPlugin
 api-version: '1.20'
 commands:
   cameraman:

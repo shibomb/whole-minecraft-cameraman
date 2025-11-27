@@ -1,4 +1,4 @@
-package com.shibomb.cameraman;
+package xyz.shibomb.cameraman;
 
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;

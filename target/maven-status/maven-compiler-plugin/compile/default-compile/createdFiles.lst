@@ -1,5 +1,5 @@
-com/shibomb/cameraman/CameramanCommand.class
-com/shibomb/cameraman/CameramanManager.class
-com/shibomb/cameraman/PlayerJoinListener.class
-com/shibomb/cameraman/CameramanPlugin.class
-com/shibomb/cameraman/RotationTask.class
+xyz/shibomb/cameraman/PlayerJoinListener.class
+xyz/shibomb/cameraman/CameramanCommand.class
+xyz/shibomb/cameraman/CameramanManager.class
+xyz/shibomb/cameraman/RotationTask.class
+xyz/shibomb/cameraman/CameramanPlugin.class

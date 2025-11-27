@@ -1,4 +1,4 @@
-package com.shibomb.cameraman;
+package xyz.shibomb.cameraman;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
