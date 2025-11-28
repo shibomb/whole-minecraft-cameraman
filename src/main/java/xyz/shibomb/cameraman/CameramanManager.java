@@ -24,6 +24,10 @@ public class CameramanManager {
     private boolean teleportSmooth = false;
     private long teleportSmoothDuration = 3L; // Seconds
     private SmoothTeleportTask currentTeleportTask;
+    private boolean spectateMode = true;
+    private boolean mobNightVision = false;
+    private org.bukkit.potion.PotionEffect previousNightVisionEffect = null;
+    private long previousNightVisionTime = 0;
 
     public CameramanManager(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -47,6 +51,9 @@ public class CameramanManager {
 
         this.teleportSmooth = plugin.getConfig().getBoolean("teleportSmooth", false);
         this.teleportSmoothDuration = plugin.getConfig().getLong("teleportSmoothDuration", 3L);
+
+        this.spectateMode = plugin.getConfig().getBoolean("spectateMode", true);
+        this.mobNightVision = plugin.getConfig().getBoolean("mobNightVision", false);
 
         checkAndStartRotationTask();
     }
@@ -96,12 +103,17 @@ public class CameramanManager {
                     + (autoMobTarget ? " (Delay: " + autoMobTargetDelay + "s)" : ""));
             player.sendMessage("Smooth Teleport: " + teleportSmooth
                     + (teleportSmooth ? " (Duration: " + teleportSmoothDuration + "s)" : ""));
+            player.sendMessage("Spectate Mode: " + spectateMode);
+            player.sendMessage("Mob Night Vision: " + mobNightVision);
         }
     }
 
     public void setTarget(org.bukkit.entity.Entity target) {
         Player cameraman = getCameraman();
         if (cameraman != null && target != null) {
+            // Clean up previous night vision states first
+            removeCameramanNightVision(cameraman);
+
             if (target instanceof Player) {
                 if (cameraman.getUniqueId().equals(target.getUniqueId())) {
                     return; // Cannot spectate self
@@ -128,16 +140,38 @@ public class CameramanManager {
 
             cameraman.setSpectatorTarget(null); // Reset first
 
-            if (teleportSmooth) {
-                cameraman.sendMessage("Moving to " + target.getName() + "...");
-                currentTeleportTask = new SmoothTeleportTask(cameraman, target, teleportSmoothDuration * 20L, () -> {
+            Runnable onTargetSet = () -> {
+                if (spectateMode) {
                     cameraman.setSpectatorTarget(target);
                     cameraman.sendMessage("Now spectating: " + target.getName());
-                });
+                } else {
+                    cameraman.sendMessage("Arrived at: " + target.getName());
+                }
+
+                // Apply Night Vision to CAMERAMAN if applicable
+                if (mobNightVision && target instanceof org.bukkit.entity.LivingEntity && !(target instanceof Player)) {
+                    applyCameramanNightVision(cameraman);
+                }
+            };
+
+            if (teleportSmooth) {
+                cameraman.sendMessage("Moving to " + target.getName() + "...");
+                currentTeleportTask = new SmoothTeleportTask(cameraman, target, teleportSmoothDuration * 20L,
+                        onTargetSet);
                 currentTeleportTask.runTaskTimer(plugin, 0L, 1L);
             } else {
-                cameraman.setSpectatorTarget(target);
-                cameraman.sendMessage("Now spectating: " + target.getName());
+                if (spectateMode) {
+                    onTargetSet.run();
+                } else {
+                    cameraman.teleport(target);
+                    cameraman.sendMessage("Moved to: " + target.getName());
+
+                    // Apply Night Vision to CAMERAMAN if applicable (Instant teleport case)
+                    if (mobNightVision && target instanceof org.bukkit.entity.LivingEntity
+                            && !(target instanceof Player)) {
+                        applyCameramanNightVision(cameraman);
+                    }
+                }
             }
         }
     }
@@ -146,7 +180,52 @@ public class CameramanManager {
         Player cameraman = getCameraman();
         if (cameraman != null) {
             cameraman.setSpectatorTarget(null);
+            removeCameramanNightVision(cameraman);
             cameraman.sendMessage("Stopped spectating.");
+        }
+    }
+
+    private void applyCameramanNightVision(Player player) {
+        org.bukkit.potion.PotionEffect current = player
+                .getPotionEffect(org.bukkit.potion.PotionEffectType.NIGHT_VISION);
+        // If current is null or not our infinite one (duration < 1000000 is a safe bet
+        // for "not infinite")
+        // We assume our infinite one is Integer.MAX_VALUE
+        if (current != null && current.getDuration() < 1000000) {
+            previousNightVisionEffect = current;
+            previousNightVisionTime = System.currentTimeMillis();
+        }
+
+        // If we don't have a current effect, or we just saved it, apply ours
+        if (current == null || current.getDuration() < 1000000) {
+            player.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.NIGHT_VISION,
+                    Integer.MAX_VALUE, 0, false, false));
+        }
+    }
+
+    private void removeCameramanNightVision(Player player) {
+        // First, check if we have the infinite effect. If so, remove it.
+        org.bukkit.potion.PotionEffect current = player
+                .getPotionEffect(org.bukkit.potion.PotionEffectType.NIGHT_VISION);
+        if (current != null && current.getDuration() > 1000000) {
+            player.removePotionEffect(org.bukkit.potion.PotionEffectType.NIGHT_VISION);
+        }
+
+        // Restore previous effect if it exists
+        if (previousNightVisionEffect != null) {
+            long elapsedTicks = (System.currentTimeMillis() - previousNightVisionTime) / 50;
+            int remaining = previousNightVisionEffect.getDuration() - (int) elapsedTicks;
+
+            if (remaining > 0) {
+                player.addPotionEffect(new org.bukkit.potion.PotionEffect(
+                        previousNightVisionEffect.getType(),
+                        remaining,
+                        previousNightVisionEffect.getAmplifier(),
+                        previousNightVisionEffect.isAmbient(),
+                        previousNightVisionEffect.hasParticles(),
+                        previousNightVisionEffect.hasIcon()));
+            }
+            previousNightVisionEffect = null;
         }
     }
 
@@ -267,6 +346,28 @@ public class CameramanManager {
         Player cameraman = getCameraman();
         if (cameraman != null) {
             cameraman.sendMessage("Smooth Teleport set to: " + enabled + " (Duration: " + duration + "s)");
+        }
+    }
+
+    public void setSpectateMode(boolean enabled) {
+        this.spectateMode = enabled;
+        plugin.getConfig().set("spectateMode", enabled);
+        plugin.saveConfig();
+
+        Player cameraman = getCameraman();
+        if (cameraman != null) {
+            cameraman.sendMessage("Spectate Mode set to: " + enabled);
+        }
+    }
+
+    public void setMobNightVision(boolean enabled) {
+        this.mobNightVision = enabled;
+        plugin.getConfig().set("mobNightVision", enabled);
+        plugin.saveConfig();
+
+        Player cameraman = getCameraman();
+        if (cameraman != null) {
+            cameraman.sendMessage("Mob Night Vision set to: " + enabled);
         }
     }
 }

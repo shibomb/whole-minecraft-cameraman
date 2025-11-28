@@ -131,6 +131,26 @@ public class CameramanCommand implements CommandExecutor {
                 sender.sendMessage("Smooth Teleport: " + teleportSmooth);
                 break;
 
+            case "spectatemode":
+                if (args.length < 2) {
+                    sender.sendMessage("Usage: /cameraman spectatemode <true/false>");
+                    return true;
+                }
+                boolean spectateMode = Boolean.parseBoolean(args[1]);
+                manager.setSpectateMode(spectateMode);
+                sender.sendMessage("Spectate Mode: " + spectateMode);
+                break;
+
+            case "mobnightvision":
+                if (args.length < 2) {
+                    sender.sendMessage("Usage: /cameraman mobnightvision <true/false>");
+                    return true;
+                }
+                boolean mobNightVision = Boolean.parseBoolean(args[1]);
+                manager.setMobNightVision(mobNightVision);
+                sender.sendMessage("Mob Night Vision: " + mobNightVision);
+                break;
+
             default:
                 sender.sendMessage("Unknown subcommand.");
                 break;
