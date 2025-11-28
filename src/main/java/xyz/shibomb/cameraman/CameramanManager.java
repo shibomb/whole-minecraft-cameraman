@@ -48,13 +48,12 @@ public class CameramanManager {
     private void checkAndStartRotationTask() {
         boolean shouldRun = rotationMode || mobTargetMode || autoMobTarget;
         
+        // Always stop the existing task to ensure we use the latest interval/settings
+        stopRotationTask();
+        
         if (shouldRun) {
-            if (this.rotationTask == null || this.rotationTask.isCancelled()) {
-                this.rotationTask = new RotationTask(this);
-                this.rotationTask.runTaskTimer(plugin, 0L, this.rotationInterval);
-            }
-        } else {
-            stopRotationTask();
+            this.rotationTask = new RotationTask(this);
+            this.rotationTask.runTaskTimer(plugin, 0L, this.rotationInterval);
         }
     }
 
