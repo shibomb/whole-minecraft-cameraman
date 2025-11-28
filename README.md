@@ -2,6 +2,11 @@
 
 A Minecraft Paper plugin that allows a designated player to act as a "Cameraman", automatically spectating players with various modes.
 
+## Live Demo
+
+Check out the plugin in action on our 24/7 YouTube Live stream:
+[**Watch Live on YouTube**](https://youtube.com/live/MWFDWFQ1ZX0)
+
 ## Features
 
 - **Cameraman Mode**: Designate a player to be the cameraman. They will be put into Spectator mode.
