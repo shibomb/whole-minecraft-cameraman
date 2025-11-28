@@ -31,6 +31,7 @@ Check out the plugin in action on our 24/7 YouTube Live stream:
 - `/cameraman spectatemode <true|false>`: Enable/disable Spectate Mode. If false, the cameraman will move to the target but not attach their view (default: true).
 - `/cameraman mobnightvision <true|false>`: Enable/disable Mob Night Vision. If true, the cameraman receives Night Vision effect when targeting a mob to improve visibility (default: false).
 - `/cameraman showmessage <true|false>`: Enable/disable informational messages (e.g., "Moving to...", "Now spectating..."). Command feedback is still shown (default: true).
+- `/cameraman nightvisionthreshold <0-15>`: Set the light level threshold for Adaptive Night Vision. Night Vision is applied if the target's light level is at or below this value (default: 7).
 
 ## Permissions
 
@@ -62,4 +63,5 @@ teleportSmoothDuration: 3
 spectateMode: true
 mobNightVision: false
 showMessage: true
+nightVisionThreshold: 7
 ```

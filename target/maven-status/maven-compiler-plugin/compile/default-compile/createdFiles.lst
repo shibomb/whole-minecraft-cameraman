@@ -4,3 +4,4 @@ xyz/shibomb/cameraman/CameramanPlugin.class
 xyz/shibomb/cameraman/CameramanCommand.class
 xyz/shibomb/cameraman/CameramanManager.class
 xyz/shibomb/cameraman/SmoothTeleportTask.class
+xyz/shibomb/cameraman/CameramanManager$1.class

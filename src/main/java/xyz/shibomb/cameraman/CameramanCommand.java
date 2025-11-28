@@ -159,6 +159,23 @@ public class CameramanCommand implements CommandExecutor {
                 manager.setShowMessage(showMessage);
                 sender.sendMessage("Show Message: " + showMessage);
                 break;
+            case "nightvisionthreshold":
+                if (args.length < 2) {
+                    sender.sendMessage("Usage: /cameraman nightvisionthreshold <0-15>");
+                    return true;
+                }
+                try {
+                    int threshold = Integer.parseInt(args[1]);
+                    if (threshold < 0 || threshold > 15) {
+                        sender.sendMessage("Threshold must be between 0 and 15.");
+                        return true;
+                    }
+                    manager.setNightVisionThreshold(threshold);
+                    sender.sendMessage("Night Vision Threshold: " + threshold);
+                } catch (NumberFormatException e) {
+                    sender.sendMessage("Invalid number format.");
+                }
+                break;
 
             default:
                 sender.sendMessage("Unknown subcommand.");

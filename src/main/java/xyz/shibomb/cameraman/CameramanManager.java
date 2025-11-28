@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +28,10 @@ public class CameramanManager {
     private boolean spectateMode = true;
     private boolean mobNightVision = false;
     private boolean showMessage = true;
+    private int nightVisionThreshold = 7;
     private org.bukkit.potion.PotionEffect previousNightVisionEffect = null;
     private long previousNightVisionTime = 0;
+    private BukkitTask lightCheckTask;
 
     public CameramanManager(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -56,6 +59,7 @@ public class CameramanManager {
         this.spectateMode = plugin.getConfig().getBoolean("spectateMode", true);
         this.mobNightVision = plugin.getConfig().getBoolean("mobNightVision", false);
         this.showMessage = plugin.getConfig().getBoolean("showMessage", true);
+        this.nightVisionThreshold = plugin.getConfig().getInt("nightVisionThreshold", 7);
 
         checkAndStartRotationTask();
     }
@@ -108,6 +112,7 @@ public class CameramanManager {
             player.sendMessage("Spectate Mode: " + spectateMode);
             player.sendMessage("Mob Night Vision: " + mobNightVision);
             player.sendMessage("Show Message: " + showMessage);
+            player.sendMessage("Night Vision Threshold: " + nightVisionThreshold);
         }
     }
 
@@ -121,6 +126,7 @@ public class CameramanManager {
         Player cameraman = getCameraman();
         if (cameraman != null && target != null) {
             // Clean up previous night vision states first
+            stopLightCheckTask();
             removeCameramanNightVision(cameraman);
 
             if (target instanceof Player) {
@@ -157,9 +163,9 @@ public class CameramanManager {
                     sendInfoMessage(cameraman, "Arrived at: " + target.getName());
                 }
 
-                // Apply Night Vision to CAMERAMAN if applicable
+                // Start Adaptive Night Vision check if applicable
                 if (mobNightVision && target instanceof org.bukkit.entity.LivingEntity && !(target instanceof Player)) {
-                    applyCameramanNightVision(cameraman);
+                    startLightCheckTask(cameraman, (org.bukkit.entity.LivingEntity) target);
                 }
             };
 
@@ -175,10 +181,10 @@ public class CameramanManager {
                     cameraman.teleport(target);
                     sendInfoMessage(cameraman, "Moved to: " + target.getName());
 
-                    // Apply Night Vision to CAMERAMAN if applicable (Instant teleport case)
+                    // Start Adaptive Night Vision check if applicable (Instant teleport case)
                     if (mobNightVision && target instanceof org.bukkit.entity.LivingEntity
                             && !(target instanceof Player)) {
-                        applyCameramanNightVision(cameraman);
+                        startLightCheckTask(cameraman, (org.bukkit.entity.LivingEntity) target);
                     }
                 }
             }
@@ -189,8 +195,36 @@ public class CameramanManager {
         Player cameraman = getCameraman();
         if (cameraman != null) {
             cameraman.setSpectatorTarget(null);
+            stopLightCheckTask();
             removeCameramanNightVision(cameraman);
             sendInfoMessage(cameraman, "Stopped spectating.");
+        }
+    }
+
+    private void startLightCheckTask(Player cameraman, org.bukkit.entity.LivingEntity target) {
+        stopLightCheckTask();
+        lightCheckTask = new org.bukkit.scheduler.BukkitRunnable() {
+            @Override
+            public void run() {
+                if (cameraman == null || !cameraman.isOnline() || target == null || !target.isValid()) {
+                    this.cancel();
+                    return;
+                }
+
+                int lightLevel = target.getLocation().getBlock().getLightLevel();
+                if (lightLevel <= nightVisionThreshold) {
+                    applyCameramanNightVision(cameraman);
+                } else {
+                    removeCameramanNightVision(cameraman);
+                }
+            }
+        }.runTaskTimer(plugin, 0L, 20L); // Check every second
+    }
+
+    private void stopLightCheckTask() {
+        if (lightCheckTask != null && !lightCheckTask.isCancelled()) {
+            lightCheckTask.cancel();
+            lightCheckTask = null;
         }
     }
 
@@ -388,6 +422,17 @@ public class CameramanManager {
         Player cameraman = getCameraman();
         if (cameraman != null) {
             cameraman.sendMessage("Show Message set to: " + enabled);
+        }
+    }
+
+    public void setNightVisionThreshold(int threshold) {
+        this.nightVisionThreshold = threshold;
+        plugin.getConfig().set("nightVisionThreshold", threshold);
+        plugin.saveConfig();
+
+        Player cameraman = getCameraman();
+        if (cameraman != null) {
+            cameraman.sendMessage("Night Vision Threshold set to: " + threshold);
         }
     }
 }
