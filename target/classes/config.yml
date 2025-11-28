@@ -2,4 +2,24 @@
 
 # The UUID of the current cameraman.
 # This is automatically updated when /cameraman set is used.
+# The UUID of the current cameraman.
+# This is automatically updated when /cameraman set is used.
 cameraman: ""
+
+# Whether Newcomer Mode is enabled.
+newcomerMode: false
+
+# Whether Rotation Mode is enabled.
+rotationMode: false
+
+# The interval (in seconds) for Rotation Mode.
+rotationInterval: 10
+
+# Whether Mob Target Mode is enabled.
+mobTargetMode: false
+
+# Whether Auto Mob Target is enabled.
+autoMobTarget: false
+
+# The delay (in seconds) before switching to Mob Target Mode when no players are available.
+autoMobTargetDelay: 5

@@ -5,7 +5,7 @@ api-version: '1.20'
 commands:
   cameraman:
     description: Control the cameraman
-    usage: /<command> [set|target|newcomer|rotation]
+    usage: /<command> [set|target|clear|newcomer|rotation|mobtarget|automob]
     permission: cameraman.use
 permissions:
   cameraman.use:

@@ -24,6 +24,16 @@ public class PlayerJoinListener implements Listener {
 
         if (manager.isNewcomerMode()) {
             manager.setTarget(event.getPlayer());
+        } else if (manager.isMobTargetMode()) {
+            // If Newcomer Mode is off, but we are in Mob Target Mode, 
+            // we should probably disable it so RotationTask can pick up the new player.
+            // But only if we want to prioritize players.
+            // Let's disable it to be safe and prioritize players.
+            manager.setMobTargetMode(false);
+            Player cameramanPlayer = manager.getCameraman();
+            if (cameramanPlayer != null) {
+                cameramanPlayer.sendMessage("Mob Target Mode disabled because a player joined.");
+            }
         }
     }
 }
