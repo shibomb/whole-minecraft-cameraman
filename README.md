@@ -30,6 +30,7 @@ Check out the plugin in action on our 24/7 YouTube Live stream:
 - `/cameraman teleportsmooth <true|false> [duration]`: Enable/disable Smooth Teleport. Optional duration in seconds (default: 3s).
 - `/cameraman spectatemode <true|false>`: Enable/disable Spectate Mode. If false, the cameraman will move to the target but not attach their view (default: true).
 - `/cameraman mobnightvision <true|false>`: Enable/disable Mob Night Vision. If true, the cameraman receives Night Vision effect when targeting a mob to improve visibility (default: false).
+- `/cameraman showmessage <true|false>`: Enable/disable informational messages (e.g., "Moving to...", "Now spectating..."). Command feedback is still shown (default: true).
 
 ## Permissions
 
@@ -60,4 +61,5 @@ teleportSmooth: false
 teleportSmoothDuration: 3
 spectateMode: true
 mobNightVision: false
+showMessage: true
 ```

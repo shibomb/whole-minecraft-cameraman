@@ -150,6 +150,15 @@ public class CameramanCommand implements CommandExecutor {
                 manager.setMobNightVision(mobNightVision);
                 sender.sendMessage("Mob Night Vision: " + mobNightVision);
                 break;
+            case "showmessage":
+                if (args.length < 2) {
+                    sender.sendMessage("Usage: /cameraman showmessage <true/false>");
+                    return true;
+                }
+                boolean showMessage = Boolean.parseBoolean(args[1]);
+                manager.setShowMessage(showMessage);
+                sender.sendMessage("Show Message: " + showMessage);
+                break;
 
             default:
                 sender.sendMessage("Unknown subcommand.");

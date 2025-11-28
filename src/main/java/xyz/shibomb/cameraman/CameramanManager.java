@@ -26,6 +26,7 @@ public class CameramanManager {
     private SmoothTeleportTask currentTeleportTask;
     private boolean spectateMode = true;
     private boolean mobNightVision = false;
+    private boolean showMessage = true;
     private org.bukkit.potion.PotionEffect previousNightVisionEffect = null;
     private long previousNightVisionTime = 0;
 
@@ -54,6 +55,7 @@ public class CameramanManager {
 
         this.spectateMode = plugin.getConfig().getBoolean("spectateMode", true);
         this.mobNightVision = plugin.getConfig().getBoolean("mobNightVision", false);
+        this.showMessage = plugin.getConfig().getBoolean("showMessage", true);
 
         checkAndStartRotationTask();
     }
@@ -105,6 +107,13 @@ public class CameramanManager {
                     + (teleportSmooth ? " (Duration: " + teleportSmoothDuration + "s)" : ""));
             player.sendMessage("Spectate Mode: " + spectateMode);
             player.sendMessage("Mob Night Vision: " + mobNightVision);
+            player.sendMessage("Show Message: " + showMessage);
+        }
+    }
+
+    private void sendInfoMessage(Player player, String message) {
+        if (showMessage && player != null) {
+            player.sendMessage(message);
         }
     }
 
@@ -122,14 +131,14 @@ public class CameramanManager {
                 // on a player now)
                 if (mobTargetMode) {
                     setMobTargetMode(false);
-                    cameraman.sendMessage("Mob Target Mode disabled because a player was targeted.");
+                    sendInfoMessage(cameraman, "Mob Target Mode disabled because a player was targeted.");
                 }
                 lastPlayerTargetTime = System.currentTimeMillis();
             }
 
             if (cameraman.getGameMode() != GameMode.SPECTATOR) {
-                cameraman
-                        .sendMessage("Cannot spectate " + target.getName() + " because you are not in Spectator mode.");
+                sendInfoMessage(cameraman,
+                        "Cannot spectate " + target.getName() + " because you are not in Spectator mode.");
                 return;
             }
 
@@ -143,9 +152,9 @@ public class CameramanManager {
             Runnable onTargetSet = () -> {
                 if (spectateMode) {
                     cameraman.setSpectatorTarget(target);
-                    cameraman.sendMessage("Now spectating: " + target.getName());
+                    sendInfoMessage(cameraman, "Now spectating: " + target.getName());
                 } else {
-                    cameraman.sendMessage("Arrived at: " + target.getName());
+                    sendInfoMessage(cameraman, "Arrived at: " + target.getName());
                 }
 
                 // Apply Night Vision to CAMERAMAN if applicable
@@ -155,7 +164,7 @@ public class CameramanManager {
             };
 
             if (teleportSmooth) {
-                cameraman.sendMessage("Moving to " + target.getName() + "...");
+                sendInfoMessage(cameraman, "Moving to " + target.getName() + "...");
                 currentTeleportTask = new SmoothTeleportTask(cameraman, target, teleportSmoothDuration * 20L,
                         onTargetSet);
                 currentTeleportTask.runTaskTimer(plugin, 0L, 1L);
@@ -164,7 +173,7 @@ public class CameramanManager {
                     onTargetSet.run();
                 } else {
                     cameraman.teleport(target);
-                    cameraman.sendMessage("Moved to: " + target.getName());
+                    sendInfoMessage(cameraman, "Moved to: " + target.getName());
 
                     // Apply Night Vision to CAMERAMAN if applicable (Instant teleport case)
                     if (mobNightVision && target instanceof org.bukkit.entity.LivingEntity
@@ -181,7 +190,7 @@ public class CameramanManager {
         if (cameraman != null) {
             cameraman.setSpectatorTarget(null);
             removeCameramanNightVision(cameraman);
-            cameraman.sendMessage("Stopped spectating.");
+            sendInfoMessage(cameraman, "Stopped spectating.");
         }
     }
 
@@ -368,6 +377,17 @@ public class CameramanManager {
         Player cameraman = getCameraman();
         if (cameraman != null) {
             cameraman.sendMessage("Mob Night Vision set to: " + enabled);
+        }
+    }
+
+    public void setShowMessage(boolean enabled) {
+        this.showMessage = enabled;
+        plugin.getConfig().set("showMessage", enabled);
+        plugin.saveConfig();
+
+        Player cameraman = getCameraman();
+        if (cameraman != null) {
+            cameraman.sendMessage("Show Message set to: " + enabled);
         }
     }
 }
