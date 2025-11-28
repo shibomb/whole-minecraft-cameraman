@@ -16,7 +16,8 @@ public class CameramanCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label,
+            @NotNull String[] args) {
         if (args.length == 0) {
             return false;
         }
@@ -110,6 +111,24 @@ public class CameramanCommand implements CommandExecutor {
                 }
                 manager.setAutoMobTarget(autoMobTarget, delay);
                 sender.sendMessage("Auto Mob Target: " + autoMobTarget);
+                break;
+
+            case "teleportsmooth":
+                if (args.length < 2) {
+                    sender.sendMessage("Usage: /cameraman teleportsmooth <true/false> [duration]");
+                    return true;
+                }
+                boolean teleportSmooth = Boolean.parseBoolean(args[1]);
+                long duration = 3; // Default
+                if (args.length >= 3) {
+                    try {
+                        duration = Long.parseLong(args[2]);
+                    } catch (NumberFormatException e) {
+                        sender.sendMessage("Invalid duration. Using default 3s.");
+                    }
+                }
+                manager.setTeleportSmooth(teleportSmooth, duration);
+                sender.sendMessage("Smooth Teleport: " + teleportSmooth);
                 break;
 
             default:

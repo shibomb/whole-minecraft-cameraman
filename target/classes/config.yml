@@ -22,4 +22,11 @@ mobTargetMode: false
 autoMobTarget: false
 
 # The delay (in seconds) before switching to Mob Target Mode when no players are available.
+# The delay (in seconds) before switching to Mob Target Mode when no players are available.
 autoMobTargetDelay: 5
+
+# Whether Smooth Teleport is enabled.
+teleportSmooth: false
+
+# The duration (in seconds) for Smooth Teleport.
+teleportSmoothDuration: 3
