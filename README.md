@@ -20,17 +20,23 @@ Check out the plugin in action on our 24/7 YouTube Live stream:
 
 ## Commands
 
+### Common
 - `/cameraman set <player>`: Set the specified player as the cameraman.
-- `/cameraman target <player>`: Manually make the cameraman spectate a specific player.
 - `/cameraman clear`: Stop spectating the current target.
+- `/cameraman teleportsmooth <true|false> [duration]`: Enable/disable Smooth Teleport. Optional duration in seconds (default: 3s).
+- `/cameraman showmessage <true|false>`: Enable/disable informational messages (e.g., "Moving to...", "Now spectating..."). Command feedback is still shown (default: true).
+
+### Player
+- `/cameraman target <player>`: Manually make the cameraman spectate a specific player.
 - `/cameraman newcomer <true|false>`: Enable/disable Newcomer Mode.
 - `/cameraman rotation <true|false> [interval]`: Enable/disable Rotation Mode. Optional interval in seconds (default: 10s).
+- `/cameraman spectatemode <true|false> [perspective]`: Enable/disable Spectate Mode for players. Optional perspective: POV, BEHIND, FRONT (default: POV).
+
+### Mob
 - `/cameraman mobtarget <true|false>`: Enable/disable Mob Target Mode.
 - `/cameraman automob <true|false> [delay]`: Enable/disable Auto Mob Target. Optional delay in seconds (default: 5s).
-- `/cameraman teleportsmooth <true|false> [duration]`: Enable/disable Smooth Teleport. Optional duration in seconds (default: 3s).
-- `/cameraman spectatemode <true|false>`: Enable/disable Spectate Mode. If false, the cameraman will move to the target but not attach their view (default: true).
+- `/cameraman mobspectatemode <true|false> [perspective]`: Enable/disable Spectate Mode for mobs. Optional perspective: POV, BEHIND, FRONT (default: POV).
 - `/cameraman mobnightvision <true|false>`: Enable/disable Mob Night Vision. If true, the cameraman receives Night Vision effect when targeting a mob to improve visibility (default: false).
-- `/cameraman showmessage <true|false>`: Enable/disable informational messages (e.g., "Moving to...", "Now spectating..."). Command feedback is still shown (default: true).
 - `/cameraman nightvisionthreshold <0-15>`: Set the light level threshold for Adaptive Night Vision. Night Vision is applied if the target's light level is at or below this value (default: 7).
 
 ## Permissions
