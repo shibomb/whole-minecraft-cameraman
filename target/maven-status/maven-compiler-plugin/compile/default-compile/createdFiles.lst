@@ -1,6 +1,8 @@
 xyz/shibomb/cameraman/PlayerJoinListener.class
 xyz/shibomb/cameraman/RotationTask.class
+xyz/shibomb/cameraman/SpectateTask.class
 xyz/shibomb/cameraman/CameramanPlugin.class
+xyz/shibomb/cameraman/SpectatePerspective.class
 xyz/shibomb/cameraman/CameramanCommand.class
 xyz/shibomb/cameraman/CameramanManager.class
 xyz/shibomb/cameraman/SmoothTeleportTask.class

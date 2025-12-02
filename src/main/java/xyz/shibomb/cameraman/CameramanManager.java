@@ -26,6 +26,10 @@ public class CameramanManager {
     private long teleportSmoothDuration = 3L; // Seconds
     private SmoothTeleportTask currentTeleportTask;
     private boolean spectateMode = true;
+    private SpectatePerspective spectatePerspective = SpectatePerspective.POV;
+    private boolean mobSpectateMode = true;
+    private SpectatePerspective mobSpectatePerspective = SpectatePerspective.POV;
+    private SpectateTask spectateTask;
     private boolean mobNightVision = false;
     private boolean showMessage = true;
     private int nightVisionThreshold = 7;
@@ -57,6 +61,21 @@ public class CameramanManager {
         this.teleportSmoothDuration = plugin.getConfig().getLong("teleportSmoothDuration", 3L);
 
         this.spectateMode = plugin.getConfig().getBoolean("spectateMode", true);
+        String perspectiveStr = plugin.getConfig().getString("spectatePerspective", "POV");
+        try {
+            this.spectatePerspective = SpectatePerspective.valueOf(perspectiveStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            this.spectatePerspective = SpectatePerspective.POV;
+        }
+
+        this.mobSpectateMode = plugin.getConfig().getBoolean("mobSpectateMode", true);
+        String mobPerspectiveStr = plugin.getConfig().getString("mobSpectatePerspective", "POV");
+        try {
+            this.mobSpectatePerspective = SpectatePerspective.valueOf(mobPerspectiveStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            this.mobSpectatePerspective = SpectatePerspective.POV;
+        }
+
         this.mobNightVision = plugin.getConfig().getBoolean("mobNightVision", false);
         this.showMessage = plugin.getConfig().getBoolean("showMessage", true);
         this.nightVisionThreshold = plugin.getConfig().getInt("nightVisionThreshold", 7);
@@ -109,7 +128,10 @@ public class CameramanManager {
                     + (autoMobTarget ? " (Delay: " + autoMobTargetDelay + "s)" : ""));
             player.sendMessage("Smooth Teleport: " + teleportSmooth
                     + (teleportSmooth ? " (Duration: " + teleportSmoothDuration + "s)" : ""));
-            player.sendMessage("Spectate Mode: " + spectateMode);
+            player.sendMessage(
+                    "Spectate Mode (Player): " + spectateMode + " (Perspective: " + spectatePerspective + ")");
+            player.sendMessage(
+                    "Spectate Mode (Mob): " + mobSpectateMode + " (Perspective: " + mobSpectatePerspective + ")");
             player.sendMessage("Mob Night Vision: " + mobNightVision);
             player.sendMessage("Show Message: " + showMessage);
             player.sendMessage("Night Vision Threshold: " + nightVisionThreshold);
@@ -127,6 +149,7 @@ public class CameramanManager {
         if (cameraman != null && target != null) {
             // Clean up previous night vision states first
             stopLightCheckTask();
+            stopSpectateTask();
             removeCameramanNightVision(cameraman);
 
             if (target instanceof Player) {
@@ -156,9 +179,29 @@ public class CameramanManager {
             cameraman.setSpectatorTarget(null); // Reset first
 
             Runnable onTargetSet = () -> {
-                if (spectateMode) {
-                    cameraman.setSpectatorTarget(target);
-                    sendInfoMessage(cameraman, "Now spectating: " + target.getName());
+                boolean activeSpectateMode;
+                SpectatePerspective activePerspective;
+
+                if (target instanceof Player) {
+                    activeSpectateMode = spectateMode;
+                    activePerspective = spectatePerspective;
+                } else {
+                    activeSpectateMode = mobSpectateMode;
+                    activePerspective = mobSpectatePerspective;
+                }
+
+                if (activeSpectateMode) {
+                    if (activePerspective == SpectatePerspective.POV) {
+                        cameraman.setSpectatorTarget(target);
+                        sendInfoMessage(cameraman, "Now spectating: " + target.getName() + " (POV)");
+                    } else {
+                        // For BEHIND/FRONT, we don't use setSpectatorTarget (it forces POV)
+                        // Instead we start the positioning task
+                        cameraman.setSpectatorTarget(null);
+                        startSpectateTask(cameraman, target, activePerspective);
+                        sendInfoMessage(cameraman,
+                                "Now spectating: " + target.getName() + " (" + activePerspective + ")");
+                    }
                 } else {
                     sendInfoMessage(cameraman, "Arrived at: " + target.getName());
                 }
@@ -175,7 +218,8 @@ public class CameramanManager {
                         onTargetSet);
                 currentTeleportTask.runTaskTimer(plugin, 0L, 1L);
             } else {
-                if (spectateMode) {
+                boolean activeSpectateMode = (target instanceof Player) ? spectateMode : mobSpectateMode;
+                if (activeSpectateMode) {
                     onTargetSet.run();
                 } else {
                     cameraman.teleport(target);
@@ -196,6 +240,7 @@ public class CameramanManager {
         if (cameraman != null) {
             cameraman.setSpectatorTarget(null);
             stopLightCheckTask();
+            stopSpectateTask();
             removeCameramanNightVision(cameraman);
             sendInfoMessage(cameraman, "Stopped spectating.");
         }
@@ -400,6 +445,52 @@ public class CameramanManager {
         Player cameraman = getCameraman();
         if (cameraman != null) {
             cameraman.sendMessage("Spectate Mode set to: " + enabled);
+        }
+    }
+
+    public void setSpectatePerspective(SpectatePerspective perspective) {
+        this.spectatePerspective = perspective;
+        plugin.getConfig().set("spectatePerspective", perspective.name());
+        plugin.saveConfig();
+
+        Player cameraman = getCameraman();
+        if (cameraman != null) {
+            cameraman.sendMessage("Spectate Perspective (Player) set to: " + perspective);
+        }
+    }
+
+    public void setMobSpectateMode(boolean enabled) {
+        this.mobSpectateMode = enabled;
+        plugin.getConfig().set("mobSpectateMode", enabled);
+        plugin.saveConfig();
+
+        Player cameraman = getCameraman();
+        if (cameraman != null) {
+            cameraman.sendMessage("Spectate Mode (Mob) set to: " + enabled);
+        }
+    }
+
+    public void setMobSpectatePerspective(SpectatePerspective perspective) {
+        this.mobSpectatePerspective = perspective;
+        plugin.getConfig().set("mobSpectatePerspective", perspective.name());
+        plugin.saveConfig();
+
+        Player cameraman = getCameraman();
+        if (cameraman != null) {
+            cameraman.sendMessage("Spectate Perspective (Mob) set to: " + perspective);
+        }
+    }
+
+    private void startSpectateTask(Player cameraman, org.bukkit.entity.Entity target, SpectatePerspective perspective) {
+        stopSpectateTask();
+        spectateTask = new SpectateTask(cameraman, target, perspective);
+        spectateTask.runTaskTimer(plugin, 0L, 1L);
+    }
+
+    private void stopSpectateTask() {
+        if (spectateTask != null && !spectateTask.isCancelled()) {
+            spectateTask.cancel();
+            spectateTask = null;
         }
     }
 

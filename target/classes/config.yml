@@ -30,3 +30,15 @@ teleportSmooth: false
 
 # The duration (in seconds) for Smooth Teleport.
 teleportSmoothDuration: 3
+
+# Whether Spectate Mode is enabled for players.
+spectateMode: true
+
+# The perspective for Spectate Mode (POV, BEHIND, FRONT).
+spectatePerspective: POV
+
+# Whether Spectate Mode is enabled for mobs.
+mobSpectateMode: true
+
+# The perspective for Mob Spectate Mode (POV, BEHIND, FRONT).
+mobSpectatePerspective: POV

@@ -133,12 +133,48 @@ public class CameramanCommand implements CommandExecutor {
 
             case "spectatemode":
                 if (args.length < 2) {
-                    sender.sendMessage("Usage: /cameraman spectatemode <true/false>");
+                    sender.sendMessage("Usage: /cameraman spectatemode <true/false> [perspective]");
                     return true;
                 }
                 boolean spectateMode = Boolean.parseBoolean(args[1]);
                 manager.setSpectateMode(spectateMode);
-                sender.sendMessage("Spectate Mode: " + spectateMode);
+
+                if (args.length >= 3) {
+                    try {
+                        SpectatePerspective perspective = SpectatePerspective.valueOf(args[2].toUpperCase());
+                        manager.setSpectatePerspective(perspective);
+                        sender.sendMessage(
+                                "Spectate Mode (Player): " + spectateMode + " (Perspective: " + perspective + ")");
+                    } catch (IllegalArgumentException e) {
+                        sender.sendMessage("Invalid perspective. Available: POV, BEHIND, FRONT");
+                        sender.sendMessage("Spectate Mode (Player): " + spectateMode);
+                    }
+                } else {
+                    sender.sendMessage("Spectate Mode (Player): " + spectateMode);
+                }
+                break;
+
+            case "mobspectatemode":
+                if (args.length < 2) {
+                    sender.sendMessage("Usage: /cameraman mobspectatemode <true/false> [perspective]");
+                    return true;
+                }
+                boolean mobSpectateMode = Boolean.parseBoolean(args[1]);
+                manager.setMobSpectateMode(mobSpectateMode);
+
+                if (args.length >= 3) {
+                    try {
+                        SpectatePerspective perspective = SpectatePerspective.valueOf(args[2].toUpperCase());
+                        manager.setMobSpectatePerspective(perspective);
+                        sender.sendMessage(
+                                "Spectate Mode (Mob): " + mobSpectateMode + " (Perspective: " + perspective + ")");
+                    } catch (IllegalArgumentException e) {
+                        sender.sendMessage("Invalid perspective. Available: POV, BEHIND, FRONT");
+                        sender.sendMessage("Spectate Mode (Mob): " + mobSpectateMode);
+                    }
+                } else {
+                    sender.sendMessage("Spectate Mode (Mob): " + mobSpectateMode);
+                }
                 break;
 
             case "mobnightvision":
