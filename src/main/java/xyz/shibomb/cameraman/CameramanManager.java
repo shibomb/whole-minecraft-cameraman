@@ -2,6 +2,7 @@ package xyz.shibomb.cameraman;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -178,16 +179,20 @@ public class CameramanManager {
 
             cameraman.setSpectatorTarget(null); // Reset first
 
+            // Determine active perspective
+            SpectatePerspective activePerspective;
+            if (target instanceof Player) {
+                activePerspective = spectatePerspective;
+            } else {
+                activePerspective = mobSpectatePerspective;
+            }
+
             Runnable onTargetSet = () -> {
                 boolean activeSpectateMode;
-                SpectatePerspective activePerspective;
-
                 if (target instanceof Player) {
                     activeSpectateMode = spectateMode;
-                    activePerspective = spectatePerspective;
                 } else {
                     activeSpectateMode = mobSpectateMode;
-                    activePerspective = mobSpectatePerspective;
                 }
 
                 if (activeSpectateMode) {
@@ -215,14 +220,16 @@ public class CameramanManager {
             if (teleportSmooth) {
                 sendInfoMessage(cameraman, "Moving to " + target.getName() + "...");
                 currentTeleportTask = new SmoothTeleportTask(cameraman, target, teleportSmoothDuration * 20L,
-                        onTargetSet);
+                        onTargetSet, activePerspective);
                 currentTeleportTask.runTaskTimer(plugin, 0L, 1L);
             } else {
                 boolean activeSpectateMode = (target instanceof Player) ? spectateMode : mobSpectateMode;
                 if (activeSpectateMode) {
                     onTargetSet.run();
                 } else {
-                    cameraman.teleport(target);
+                    // Instant teleport with perspective
+                    Location targetLoc = SpectateTask.calculateViewLocation(target, activePerspective);
+                    cameraman.teleport(targetLoc);
                     sendInfoMessage(cameraman, "Moved to: " + target.getName());
 
                     // Start Adaptive Night Vision check if applicable (Instant teleport case)

@@ -13,14 +13,17 @@ public class SmoothTeleportTask extends BukkitRunnable {
     private final Location startLocation;
     private final long durationTicks;
     private final Runnable onComplete;
+    private final SpectatePerspective perspective;
     private long currentTick = 0;
 
-    public SmoothTeleportTask(Player cameraman, Entity target, long durationTicks, Runnable onComplete) {
+    public SmoothTeleportTask(Player cameraman, Entity target, long durationTicks, Runnable onComplete,
+            SpectatePerspective perspective) {
         this.cameraman = cameraman;
         this.target = target;
         this.startLocation = cameraman.getLocation();
         this.durationTicks = durationTicks;
         this.onComplete = onComplete;
+        this.perspective = perspective;
     }
 
     @Override
@@ -40,7 +43,7 @@ public class SmoothTeleportTask extends BukkitRunnable {
         // Smooth step interpolation for nicer easing
         t = t * t * (3 - 2 * t);
 
-        Location targetLoc = target.getLocation();
+        Location targetLoc = SpectateTask.calculateViewLocation(target, perspective);
         Vector startVec = startLocation.toVector();
         Vector targetVec = targetLoc.toVector();
 

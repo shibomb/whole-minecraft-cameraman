@@ -25,6 +25,11 @@ public class SpectateTask extends BukkitRunnable {
             return;
         }
 
+        Location camLoc = calculateViewLocation(target, perspective);
+        cameraman.teleport(camLoc);
+    }
+
+    public static Location calculateViewLocation(Entity target, SpectatePerspective perspective) {
         Location targetLoc = target.getLocation();
         Location camLoc = targetLoc.clone();
 
@@ -45,6 +50,6 @@ public class SpectateTask extends BukkitRunnable {
             camLoc.setDirection(lookAt.toVector().subtract(camLoc.toVector()));
         }
 
-        cameraman.teleport(camLoc);
+        return camLoc;
     }
 }

@@ -30,12 +30,12 @@ Check out the plugin in action on our 24/7 YouTube Live stream:
 - `/cameraman target <player>`: Manually make the cameraman spectate a specific player.
 - `/cameraman newcomer <true|false>`: Enable/disable Newcomer Mode.
 - `/cameraman rotation <true|false> [interval]`: Enable/disable Rotation Mode. Optional interval in seconds (default: 10s).
-- `/cameraman spectatemode <true|false> [perspective]`: Enable/disable Spectate Mode for players. Optional perspective: POV, BEHIND, FRONT (default: POV).
+- `/cameraman spectatemode <true|false> [perspective]`: Enable/disable Spectate Mode for players. Optional perspective: POV, BEHIND, FRONT (default: POV). If false, the cameraman teleports to the perspective location without attaching view.
 
 ### Mob
 - `/cameraman mobtarget <true|false>`: Enable/disable Mob Target Mode.
 - `/cameraman automob <true|false> [delay]`: Enable/disable Auto Mob Target. Optional delay in seconds (default: 5s).
-- `/cameraman mobspectatemode <true|false> [perspective]`: Enable/disable Spectate Mode for mobs. Optional perspective: POV, BEHIND, FRONT (default: POV).
+- `/cameraman mobspectatemode <true|false> [perspective]`: Enable/disable Spectate Mode for mobs. Optional perspective: POV, BEHIND, FRONT (default: POV). If false, the cameraman teleports to the perspective location without attaching view.
 - `/cameraman mobnightvision <true|false>`: Enable/disable Mob Night Vision. If true, the cameraman receives Night Vision effect when targeting a mob to improve visibility (default: false).
 - `/cameraman nightvisionthreshold <0-15>`: Set the light level threshold for Adaptive Night Vision. Night Vision is applied if the target's light level is at or below this value (default: 7).
 
@@ -67,6 +67,9 @@ autoMobTargetDelay: 5
 teleportSmooth: false
 teleportSmoothDuration: 3
 spectateMode: true
+spectatePerspective: POV
+mobSpectateMode: true
+mobSpectatePerspective: POV
 mobNightVision: false
 showMessage: true
 nightVisionThreshold: 7
