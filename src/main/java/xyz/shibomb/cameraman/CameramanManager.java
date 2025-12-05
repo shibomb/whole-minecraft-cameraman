@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import xyz.shibomb.cameraman.shots.CameraShot;
 import xyz.shibomb.cameraman.shots.CraneShot;
@@ -18,6 +19,10 @@ import xyz.shibomb.cameraman.shots.DynamicFollowShot;
 import xyz.shibomb.cameraman.shots.FlybyShot;
 import xyz.shibomb.cameraman.shots.OrbitShot;
 import xyz.shibomb.cameraman.shots.StaticShot;
+import xyz.shibomb.cameraman.targets.CameraTarget;
+import xyz.shibomb.cameraman.targets.EntityTarget;
+import xyz.shibomb.cameraman.targets.LocationTarget;
+import xyz.shibomb.cameraman.shots.MoveShot;
 
 public class CameramanManager {
 
@@ -38,7 +43,7 @@ public class CameramanManager {
     private SpectatePerspective spectatePerspective = SpectatePerspective.POV;
     private boolean mobSpectateMode = true;
     private SpectatePerspective mobSpectatePerspective = SpectatePerspective.POV;
-    private SpectateTask spectateTask;
+    private SpectateTask currentSpectateTask;
     private boolean mobNightVision = false;
     private boolean showMessage = true;
     private int nightVisionThreshold = 7;
@@ -47,13 +52,22 @@ public class CameramanManager {
     private BukkitTask lightCheckTask;
     private String spectateDistance = "3.0";
     private String spectateHeight = "1.0";
-    private String orbitSpeed = "1.0";
-    private String orbitDirection = "LEFT";
+    private String orbitSpeed = "0.2";
+    private String orbitDirection = "RANDOM";
     private String dynamicSmoothness = "0.1";
-    private String flybyDuration = "5.0";
-    private String craneDuration = "5.0";
+    private String flybyDuration = "30.0";
+    private String craneDuration = "30.0";
     private String craneHeightMin = "1.0";
     private String craneHeightMax = "5.0";
+    private List<SpectatePerspective> randomPlayerPerspectives = new ArrayList<>();
+    private List<SpectatePerspective> randomMobPerspectives = new ArrayList<>();
+    private List<SpectatePerspective> randomScenicPerspectives = new ArrayList<>();
+    private boolean autoScenic = false;
+    private SpectatePerspective autoScenicPerspective = SpectatePerspective.ORBIT;
+    private String moveX = "-1-1";
+    private String moveY = "0";
+    private String moveZ = "-1-1";
+    private String moveSpeed = "0.1";
 
     public CameramanManager(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -100,15 +114,59 @@ public class CameramanManager {
         this.nightVisionThreshold = plugin.getConfig().getInt("nightVisionThreshold", 7);
         this.spectateDistance = plugin.getConfig().getString("spectateDistance", "3.0");
         this.spectateHeight = plugin.getConfig().getString("spectateHeight", "1.0");
-        this.orbitSpeed = plugin.getConfig().getString("orbitSpeed", "1.0");
-        this.orbitDirection = plugin.getConfig().getString("orbitDirection", "LEFT");
+        this.orbitSpeed = plugin.getConfig().getString("orbitSpeed", "0.2");
+        this.orbitDirection = plugin.getConfig().getString("orbitDirection", "RANDOM");
         this.dynamicSmoothness = plugin.getConfig().getString("dynamicSmoothness", "0.1");
-        this.flybyDuration = plugin.getConfig().getString("flybyDuration", "5.0");
-        this.craneDuration = plugin.getConfig().getString("craneDuration", "5.0");
+        this.flybyDuration = plugin.getConfig().getString("flybyDuration", "30.0");
+        this.craneDuration = plugin.getConfig().getString("craneDuration", "30.0");
         this.craneHeightMin = plugin.getConfig().getString("craneHeightMin", "1.0");
         this.craneHeightMax = plugin.getConfig().getString("craneHeightMax", "5.0");
+        this.moveX = plugin.getConfig().getString("moveX", "-1-1");
+        this.moveY = plugin.getConfig().getString("moveY", "0");
+        this.moveZ = plugin.getConfig().getString("moveZ", "-1-1");
+        this.moveSpeed = plugin.getConfig().getString("moveSpeed", "0.1");
+
+        this.autoScenic = plugin.getConfig().getBoolean("autoScenic", false);
+        String autoScenicPerspStr = plugin.getConfig().getString("autoScenicPerspective", "ORBIT");
+        try {
+            this.autoScenicPerspective = SpectatePerspective.valueOf(autoScenicPerspStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            this.autoScenicPerspective = SpectatePerspective.ORBIT;
+        }
+
+        loadRandomPerspectives();
 
         checkAndStartRotationTask();
+    }
+
+    private void loadRandomPerspectives() {
+        randomPlayerPerspectives = loadPerspectiveList("randomPlayerPerspectives");
+        randomMobPerspectives = loadPerspectiveList("randomMobPerspectives");
+        randomScenicPerspectives = loadPerspectiveList("randomScenicPerspectives");
+    }
+
+    private List<SpectatePerspective> loadPerspectiveList(String path) {
+        List<String> list = plugin.getConfig().getStringList(path);
+        if (list == null || list.isEmpty()) {
+            // Default fallback if missing
+            List<SpectatePerspective> defaults = new ArrayList<>();
+            defaults.add(SpectatePerspective.POV);
+            defaults.add(SpectatePerspective.BEHIND);
+            defaults.add(SpectatePerspective.FRONT);
+            defaults.add(SpectatePerspective.ORBIT);
+            defaults.add(SpectatePerspective.DYNAMIC);
+            defaults.add(SpectatePerspective.FLYBY);
+            defaults.add(SpectatePerspective.CRANE);
+            return defaults;
+        }
+        return list.stream().map(s -> {
+            try {
+                return SpectatePerspective.valueOf(s.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                plugin.getLogger().warning("Invalid perspective in config: " + s);
+                return null;
+            }
+        }).filter(p -> p != null && p != SpectatePerspective.RANDOM).collect(Collectors.toList());
     }
 
     private void checkAndStartRotationTask() {
@@ -148,21 +206,7 @@ public class CameramanManager {
         if (cameramanId != null && cameramanId.equals(player.getUniqueId())) {
             player.setGameMode(GameMode.SPECTATOR);
             player.sendMessage("Welcome back, Cameraman!");
-            player.sendMessage("Newcomer Mode: " + newcomerMode);
-            player.sendMessage("Rotation Mode: " + rotationMode
-                    + (rotationMode ? " (Interval: " + (rotationInterval / 20) + "s)" : ""));
-            player.sendMessage("Mob Target Mode: " + mobTargetMode);
-            player.sendMessage("Auto Mob Target: " + autoMobTarget
-                    + (autoMobTarget ? " (Delay: " + autoMobTargetDelay + "s)" : ""));
-            player.sendMessage("Smooth Teleport: " + teleportSmooth
-                    + (teleportSmooth ? " (Duration: " + teleportSmoothDuration + "s)" : ""));
-            player.sendMessage(
-                    "Spectate Mode (Player): " + spectateMode + " (Perspective: " + spectatePerspective + ")");
-            player.sendMessage(
-                    "Spectate Mode (Mob): " + mobSpectateMode + " (Perspective: " + mobSpectatePerspective + ")");
-            player.sendMessage("Mob Night Vision: " + mobNightVision);
-            player.sendMessage("Show Message: " + showMessage);
-            player.sendMessage("Night Vision Threshold: " + nightVisionThreshold);
+
         }
     }
 
@@ -216,10 +260,20 @@ public class CameramanManager {
 
             SpectatePerspective activePerspective;
             if ("RANDOM".equalsIgnoreCase(configPerspective.name())) {
-                SpectatePerspective[] perspectives = { SpectatePerspective.POV, SpectatePerspective.BEHIND,
-                        SpectatePerspective.FRONT, SpectatePerspective.ORBIT, SpectatePerspective.DYNAMIC,
-                        SpectatePerspective.FLYBY, SpectatePerspective.CRANE };
-                activePerspective = perspectives[new Random().nextInt(perspectives.length)];
+                List<SpectatePerspective> pool;
+                if (target instanceof LocationTarget) {
+                    pool = randomScenicPerspectives;
+                } else if (target instanceof Player) {
+                    pool = randomPlayerPerspectives;
+                } else {
+                    pool = randomMobPerspectives;
+                }
+
+                if (pool.isEmpty()) {
+                    activePerspective = SpectatePerspective.POV;
+                } else {
+                    activePerspective = pool.get(new Random().nextInt(pool.size()));
+                }
             } else {
                 activePerspective = configPerspective;
             }
@@ -249,6 +303,11 @@ public class CameramanManager {
                     }
                 } else {
                     sendInfoMessage(cameraman, "Arrived at: " + target.getName());
+
+                    // Auto Scenic Check (if not in spectate mode)
+                    if (autoScenic) {
+                        startScenicTask(target.getLocation(), autoScenicPerspective);
+                    }
                 }
 
                 // Start Adaptive Night Vision check if applicable
@@ -260,7 +319,8 @@ public class CameramanManager {
             if (teleportSmooth) {
                 sendInfoMessage(cameraman, "Moving to " + target.getName() + "...");
                 CameraShot shot = createCameraShot(activePerspective, maxDist, maxHeight);
-                currentTeleportTask = new SmoothTeleportTask(cameraman, target, teleportSmoothDuration * 20L,
+                currentTeleportTask = new SmoothTeleportTask(cameraman, new EntityTarget(target),
+                        teleportSmoothDuration * 20L,
                         onTargetSet, shot);
                 currentTeleportTask.runTaskTimer(plugin, 0L, 1L);
             } else {
@@ -270,9 +330,15 @@ public class CameramanManager {
                 } else {
                     // Instant teleport with perspective
                     CameraShot shot = createCameraShot(activePerspective, maxDist, maxHeight);
-                    Location targetLoc = shot.getNextLocation(cameraman, target, 0); // Get initial position
+                    Location targetLoc = shot.getNextLocation(cameraman, new EntityTarget(target), 0); // Get initial
+                                                                                                       // position
                     cameraman.teleport(targetLoc);
                     sendInfoMessage(cameraman, "Moved to: " + target.getName());
+
+                    // Auto Scenic Check (if not in spectate mode)
+                    if (autoScenic) {
+                        startScenicTask(target.getLocation(), autoScenicPerspective);
+                    }
 
                     // Start Adaptive Night Vision check if applicable (Instant teleport case)
                     if (mobNightVision && target instanceof org.bukkit.entity.LivingEntity
@@ -531,11 +597,72 @@ public class CameramanManager {
     }
 
     private void startSpectateTask(Player cameraman, org.bukkit.entity.Entity target, SpectatePerspective perspective,
-            double distance, double height) {
-        stopSpectateTask();
+            double distance,
+            double height) {
+        if (target == null)
+            return;
+
         CameraShot shot = createCameraShot(perspective, distance, height);
-        spectateTask = new SpectateTask(cameraman, target, shot);
-        spectateTask.runTaskTimer(plugin, 0L, 1L);
+
+        // Cancel previous task
+        if (currentSpectateTask != null && !currentSpectateTask.isCancelled()) {
+            currentSpectateTask.cancel();
+        }
+
+        currentSpectateTask = new SpectateTask(cameraman, new EntityTarget(target), shot);
+        currentSpectateTask.runTaskTimer(plugin, 0L, 1L);
+    }
+
+    public void startScenicTask(Location startLocation, SpectatePerspective perspective) {
+        Player cameraman = getCameraman();
+        if (cameraman == null)
+            return;
+
+        // Ensure Spectator mode
+        if (cameraman.getGameMode() != GameMode.SPECTATOR) {
+            cameraman.sendMessage("You must be in Spectator Mode to use Scenic Mode.");
+            return;
+        }
+
+        // Resolve RANDOM if needed
+        SpectatePerspective actualPerspective = perspective;
+        if (perspective == SpectatePerspective.RANDOM) {
+            if (!randomScenicPerspectives.isEmpty()) {
+                actualPerspective = randomScenicPerspectives
+                        .get(new Random().nextInt(randomScenicPerspectives.size()));
+            } else {
+                actualPerspective = SpectatePerspective.ORBIT; // Default fallback
+            }
+        }
+
+        // Parse configs directly or reuse existing fields?
+        // We can reuse the fields.
+        double distance = parseAndCalculate(spectateDistance);
+        double height = parseAndCalculate(spectateHeight);
+
+        CameraShot shot = createCameraShot(actualPerspective, distance, height);
+
+        // Stop other tasks
+        stopFollowing();
+
+        currentSpectateTask = new SpectateTask(cameraman, new LocationTarget(startLocation), shot);
+        // Execute immediately to prevent 1-tick jitter
+        currentSpectateTask.run();
+        // Schedule subsequent runs starting from next tick
+        currentSpectateTask.runTaskTimer(plugin, 1L, 1L);
+    }
+
+    public void stopFollowing() {
+        if (currentSpectateTask != null && !currentSpectateTask.isCancelled()) {
+            currentSpectateTask.cancel();
+        }
+        if (currentTeleportTask != null && !currentTeleportTask.isCancelled()) {
+            currentTeleportTask.cancel();
+            currentTeleportTask = null;
+        }
+        Player p = getCameraman();
+        if (p != null)
+            p.setSpectatorTarget(null);
     }
 
     private CameraShot createCameraShot(SpectatePerspective perspective, double distance, double height) {
@@ -565,15 +692,21 @@ public class CameramanManager {
             double min = Double.parseDouble(craneHeightMin);
             double max = Double.parseDouble(craneHeightMax);
             return new CraneShot(dur, min, max, distance);
+        } else if (perspective == SpectatePerspective.MOVE) {
+            double x = parseAndCalculate(moveX);
+            double y = parseAndCalculate(moveY);
+            double z = parseAndCalculate(moveZ);
+            double speed = parseAndCalculate(moveSpeed);
+            return new MoveShot(x, y, z, speed, distance, height);
         } else {
             return new StaticShot(perspective, distance, height);
         }
     }
 
     private void stopSpectateTask() {
-        if (spectateTask != null && !spectateTask.isCancelled()) {
-            spectateTask.cancel();
-            spectateTask = null;
+        if (currentSpectateTask != null && !currentSpectateTask.isCancelled()) {
+            currentSpectateTask.cancel();
+            currentSpectateTask = null;
         }
     }
 
@@ -636,21 +769,30 @@ public class CameramanManager {
         if (value == null)
             return 3.0; // Fallback matches default logic
         try {
-            if (value.contains("-")) {
-                String[] parts = value.split("-");
-                if (parts.length == 2) {
-                    double min = Double.parseDouble(parts[0].trim());
-                    double max = Double.parseDouble(parts[1].trim());
-                    if (min > max) {
-                        double temp = min;
-                        min = max;
-                        max = temp;
-                    }
-                    return min + (new Random().nextDouble() * (max - min));
+            // Regex for range: (number)-(number)
+            // Supports negative numbers e.g. -1.5--0.5, -5-5
+            // Group 1: Min, Group 3: Max (skipping inner groups for decimals)
+            java.util.regex.Pattern rangePattern = java.util.regex.Pattern
+                    .compile("^((-?\\d+(\\.\\d+)?))-((-?\\d+(\\.\\d+)?))$");
+            java.util.regex.Matcher matcher = rangePattern.matcher(value.trim());
+
+            if (matcher.matches()) {
+                double min = Double.parseDouble(matcher.group(1));
+                double max = Double.parseDouble(matcher.group(4));
+
+                if (min > max) {
+                    double temp = min;
+                    min = max;
+                    max = temp;
                 }
+                return min + (new Random().nextDouble() * (max - min));
             }
+
+            // Not a range, try parsing as single value
             return Double.parseDouble(value);
         } catch (NumberFormatException e) {
+            // Log warning?
+            // plugin.getLogger().warning("Failed to parse value: " + value);
             return 3.0; // Fallback default
         }
     }
@@ -701,5 +843,66 @@ public class CameramanManager {
         plugin.saveConfig();
         if (getCameraman() != null)
             getCameraman().sendMessage("Crane Duration: " + val);
+    }
+
+    public void setRandomPerspectives(String type, List<String> perspectives) {
+        String path;
+        List<SpectatePerspective> targetList;
+        if (type.equalsIgnoreCase("player")) {
+            path = "randomPlayerPerspectives";
+        } else if (type.equalsIgnoreCase("mob")) {
+            path = "randomMobPerspectives";
+        } else {
+            path = "randomScenicPerspectives";
+        }
+
+        plugin.getConfig().set(path, perspectives);
+        plugin.saveConfig();
+        loadRandomPerspectives(); // Reload
+
+        if (getCameraman() != null) {
+            getCameraman().sendMessage(
+                    "Random perspectives updated for " + type + ": " + perspectives);
+        }
+    }
+
+    public void setMoveSpeed(String speed) {
+        this.moveSpeed = speed;
+        plugin.getConfig().set("moveSpeed", speed);
+        plugin.saveConfig();
+        if (getCameraman() != null) {
+            getCameraman().sendMessage("Move Speed set to: " + speed);
+        }
+    }
+
+    public void setMoveDirection(String x, String y, String z) {
+        this.moveX = x;
+        this.moveY = y;
+        this.moveZ = z;
+        plugin.getConfig().set("moveX", x);
+        plugin.getConfig().set("moveY", y);
+        plugin.getConfig().set("moveZ", z);
+        plugin.saveConfig();
+        if (getCameraman() != null) {
+            getCameraman().sendMessage("Move Direction set to: X=" + x + ", Y=" + y + ", Z=" + z);
+        }
+    }
+
+    public void setAutoScenic(boolean enabled, SpectatePerspective perspective) {
+        this.autoScenic = enabled;
+        if (perspective != null) {
+            this.autoScenicPerspective = perspective;
+            plugin.getConfig().set("autoScenicPerspective", perspective.name());
+        }
+        plugin.getConfig().set("autoScenic", enabled);
+        plugin.saveConfig();
+
+        if (getCameraman() != null) {
+            String msg = "Auto Scenic: " + enabled;
+            if (perspective != null) {
+                msg += " (Perspective: " + perspective.name() + ")";
+            }
+            getCameraman().sendMessage(msg);
+        }
     }
 }

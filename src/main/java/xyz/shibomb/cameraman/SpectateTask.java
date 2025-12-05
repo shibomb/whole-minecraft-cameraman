@@ -1,20 +1,20 @@
 package xyz.shibomb.cameraman;
 
 import org.bukkit.Location;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import xyz.shibomb.cameraman.shots.CameraShot;
+import xyz.shibomb.cameraman.targets.CameraTarget;
 
 public class SpectateTask extends BukkitRunnable {
 
     private final Player cameraman;
-    private final Entity target;
+    private final CameraTarget target;
     private final CameraShot cameraShot;
     private long tick = 0;
 
-    public SpectateTask(Player cameraman, Entity target, CameraShot cameraShot) {
+    public SpectateTask(Player cameraman, CameraTarget target, CameraShot cameraShot) {
         this.cameraman = cameraman;
         this.target = target;
         this.cameraShot = cameraShot;

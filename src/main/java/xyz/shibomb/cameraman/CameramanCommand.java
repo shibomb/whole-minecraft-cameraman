@@ -1,5 +1,10 @@
 package xyz.shibomb.cameraman;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -322,6 +327,108 @@ public class CameramanCommand implements CommandExecutor {
                     return true;
                 }
                 manager.setCraneDuration(args[1]);
+                break;
+
+            case "random":
+                if (args.length < 3) {
+                    sender.sendMessage("Usage: /cameraman random <player|mob> <mode1,mode2...>");
+                    return true;
+                }
+                String type = args[1].toLowerCase();
+                if (!type.equals("player") && !type.equals("mob") && !type.equals("scenic")) {
+                    sender.sendMessage("Invalid type. usage: /cameraman random <player|mob|scenic> ...");
+                    return true;
+                }
+
+                String[] modes = args[2].toUpperCase().split(",");
+                List<String> validModes = new ArrayList<>();
+                for (String mode : modes) {
+                    try {
+                        SpectatePerspective p = SpectatePerspective.valueOf(mode);
+                        if (p != SpectatePerspective.RANDOM) {
+                            validModes.add(p.name());
+                        }
+                    } catch (IllegalArgumentException e) {
+                        sender.sendMessage("Warning: skipping invalid mode '" + mode + "'");
+                    }
+                }
+
+                if (validModes.isEmpty()) {
+                    sender.sendMessage("No valid modes provided. List unchanged.");
+                    return true;
+                }
+                manager.setRandomPerspectives(type, validModes);
+                break;
+
+            case "scenic":
+                if (args.length < 2) {
+                    sender.sendMessage("Usage: /cameraman scenic <true|false> [perspective]");
+                    return true;
+                }
+                boolean scenicEnable = Boolean.parseBoolean(args[1]);
+                if (scenicEnable) {
+                    SpectatePerspective perspective = SpectatePerspective.POV;
+                    if (args.length >= 3) {
+                        try {
+                            perspective = SpectatePerspective.valueOf(args[2].toUpperCase());
+                        } catch (IllegalArgumentException e) {
+                            sender.sendMessage("Invalid perspective.");
+                            return true;
+                        }
+                    }
+                    if (sender instanceof Player) {
+                        Player p = (Player) sender;
+                        manager.startScenicTask(p.getLocation(), perspective);
+                        sender.sendMessage("Scenic Mode enabled: " + perspective + " at your location.");
+                    } else {
+                        // If console, use the cameraman's current location
+                        Player cameraman = manager.getCameraman();
+                        if (cameraman != null) {
+                            manager.startScenicTask(cameraman.getLocation(), perspective);
+                            sender.sendMessage("Scenic Mode enabled: " + perspective + " at cameraman's location.");
+                        } else {
+                            sender.sendMessage(
+                                    "No cameraman set. Cannot start Scenic Mode from console without a cameraman.");
+                        }
+                    }
+                } else {
+                    manager.stopFollowing();
+                    sender.sendMessage("Scenic Mode disabled.");
+                }
+                break;
+
+            case "autoscenic":
+                if (args.length < 2) {
+                    sender.sendMessage("Usage: /cameraman autoscenic <true|false> [perspective]");
+                    return true;
+                }
+                boolean autoScenic = Boolean.parseBoolean(args[1]);
+                SpectatePerspective autoScenicPerspective = null;
+                if (args.length >= 3) {
+                    try {
+                        autoScenicPerspective = SpectatePerspective.valueOf(args[2].toUpperCase());
+                    } catch (IllegalArgumentException e) {
+                        sender.sendMessage("Invalid perspective.");
+                        return true;
+                    }
+                }
+                manager.setAutoScenic(autoScenic, autoScenicPerspective);
+                break;
+
+            case "movespeed":
+                if (args.length < 2) {
+                    sender.sendMessage("Usage: /cameraman movespeed <value|min-max>");
+                    return true;
+                }
+                manager.setMoveSpeed(args[1]);
+                break;
+
+            case "movedirection":
+                if (args.length < 4) {
+                    sender.sendMessage("Usage: /cameraman movedirection <x> <y> <z> (supports ranges e.g. -1-1)");
+                    return true;
+                }
+                manager.setMoveDirection(args[1], args[2], args[3]);
                 break;
 
             default:

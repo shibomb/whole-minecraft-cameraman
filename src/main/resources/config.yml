@@ -25,7 +25,12 @@ autoMobTarget: false
 # The delay (in seconds) before switching to Mob Target Mode when no players are available.
 autoMobTargetDelay: 5
 
-# Whether Smooth Teleport is enabled.
+# Auto Scenic Mode (Activates Scenic Mode automatically when Spectator Mode is disabled)
+# If spectateMode is false, after teleporting to the target, a Scenic Task will start.
+autoScenic: false
+autoScenicPerspective: ORBIT
+
+# Teleport settings
 teleportSmooth: false
 
 # The duration (in seconds) for Smooth Teleport.
@@ -50,21 +55,56 @@ spectateDistance: "3.0"
 # The height for BEHIND/FRONT perspectives. Can be a fixed number (e.g., "1.0") or a range (e.g., "1.0-3.0").
 spectateHeight: "1.0"
 
-# The speed for ORBIT perspective (degrees per tick). Can be a fixed number or range.
-orbitSpeed: "1.0"
+# The speed of rotation around the target in ORBIT perspective (degrees per tick).
+# Can be a single number (e.g. 1.0) or a range (e.g. 0.5-1.5).
+orbitSpeed: "0.2"
 
 # The direction for ORBIT perspective (LEFT, RIGHT, RANDOM).
-orbitDirection: "LEFT"
+orbitDirection: "RANDOM"
 
 # Smoothness for DYNAMIC perspective (0.01 - 1.0). Lower is smoother/slower.
 dynamicSmoothness: "0.1"
 
 # Duration for FLYBY perspective loop (seconds).
-flybyDuration: "5.0"
+flybyDuration: "30.0"
 
 # Duration for CRANE perspective loop (seconds).
-craneDuration: "5.0"
+craneDuration: "30.0"
 
 # Height range for CRANE perspective.
 craneHeightMin: "1.0"
 craneHeightMax: "5.0"
+
+# Settings for MOVE perspective (Simple linear movement)
+# format: "value" or "min-max"
+moveX: "-1-1"
+moveY: "0"
+moveZ: "-1-1"
+moveSpeed: "0.1"
+
+# List of perspectives to choose from when using RANDOM mode for Players.
+randomPlayerPerspectives:
+  - POV
+  - BEHIND
+  - FRONT
+  - ORBIT
+  - DYNAMIC
+  - FLYBY
+  - MOVE
+
+# List of perspectives to choose from when using RANDOM mode for Scenic Mode.
+randomScenicPerspectives:
+  - ORBIT
+  - FLYBY
+  - MOVE
+  - CRANE
+  - CRANE
+
+# List of perspectives to choose from when using RANDOM mode for Mobs.
+randomMobPerspectives:
+  - POV
+  - BEHIND
+  - FRONT
+  - ORBIT
+  - FLYBY
+  - CRANE

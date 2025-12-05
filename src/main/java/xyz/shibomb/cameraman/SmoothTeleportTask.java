@@ -1,28 +1,28 @@
 package xyz.shibomb.cameraman;
 
 import org.bukkit.Location;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import xyz.shibomb.cameraman.shots.CameraShot;
+import xyz.shibomb.cameraman.targets.CameraTarget;
 
 public class SmoothTeleportTask extends BukkitRunnable {
 
     private final Player cameraman;
-    private final Entity target;
+    private final CameraTarget target;
     private final long totalTicks;
     private final Runnable onComplete;
     private final CameraShot cameraShot;
+    private final Location startLoc;
     private long currentTick = 0;
-    private Location startLoc;
 
-    public SmoothTeleportTask(Player cameraman, Entity target, long durationTicks, Runnable onComplete,
+    public SmoothTeleportTask(Player cameraman, CameraTarget target, long totalTicks, Runnable onComplete,
             CameraShot cameraShot) {
         this.cameraman = cameraman;
         this.target = target;
-        this.totalTicks = durationTicks;
+        this.totalTicks = totalTicks;
         this.onComplete = onComplete;
         this.cameraShot = cameraShot;
         this.startLoc = cameraman.getLocation();
@@ -30,14 +30,14 @@ public class SmoothTeleportTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        if (cameraman == null || !cameraman.isOnline() || target == null || !target.isValid()) {
-            this.cancel();
-            return;
-        }
-
         if (currentTick >= totalTicks) {
-            this.cancel();
-            onComplete.run();
+            // Teleport to final destination
+            Location finalLoc = cameraShot.getNextLocation(cameraman, target, 0);
+            cameraman.teleport(finalLoc);
+            cancel();
+            if (onComplete != null) {
+                onComplete.run();
+            }
             return;
         }
 

@@ -1,9 +1,9 @@
 package xyz.shibomb.cameraman.shots;
 
 import org.bukkit.Location;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
+import xyz.shibomb.cameraman.targets.CameraTarget;
 
 public class DynamicFollowShot implements CameraShot {
 
@@ -18,7 +18,7 @@ public class DynamicFollowShot implements CameraShot {
     }
 
     @Override
-    public Location getNextLocation(Player cameraman, Entity target, long tick) {
+    public Location getNextLocation(Player cameraman, CameraTarget target, long tick) {
         // Ideal position is standard BEHIND logic
         Location targetLoc = target.getLocation();
         Vector direction = targetLoc.getDirection().setY(0).normalize(); // Horizontal direction

@@ -1,10 +1,10 @@
 package xyz.shibomb.cameraman.shots;
 
 import org.bukkit.Location;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 import xyz.shibomb.cameraman.SpectatePerspective;
+import xyz.shibomb.cameraman.targets.CameraTarget;
 
 public class StaticShot implements CameraShot {
 
@@ -19,29 +19,27 @@ public class StaticShot implements CameraShot {
     }
 
     @Override
-    public Location getNextLocation(Player cameraman, Entity target, long tick) {
+    public Location getNextLocation(Player cameraman, CameraTarget target, long tick) {
         Location targetLoc = target.getLocation();
-        Location camLoc = targetLoc.clone();
+        Vector direction = targetLoc.getDirection();
 
-        if (perspective == SpectatePerspective.BEHIND) {
-            // Position behind the target
-            Vector direction = targetLoc.getDirection().normalize().multiply(-distance);
-            camLoc.add(direction);
-            camLoc.add(0, height, 0); // height adjustments
-            camLoc.setDirection(targetLoc.toVector().subtract(camLoc.toVector()));
-        } else if (perspective == SpectatePerspective.FRONT) {
-            // Position in front of the target
-            Vector direction = targetLoc.getDirection().normalize().multiply(distance);
-            camLoc.add(direction);
+        Location camLoc;
+
+        if (perspective == SpectatePerspective.FRONT) {
+            // In front: target + direction * distance
+            camLoc = targetLoc.clone().add(direction.clone().multiply(distance));
             camLoc.add(0, height, 0);
 
-            // Face the target
-            Location lookAt = targetLoc.clone().add(0, 1.5, 0); // Look at head
-            camLoc.setDirection(lookAt.toVector().subtract(camLoc.toVector()));
+            // Look AT target (inverse of direction)
+            camLoc.setDirection(direction.clone().multiply(-1));
         } else {
-            // Fallback for POV or other invalid types, though POV is usually handled by
-            // setSpectatorTarget
-            return targetLoc;
+            // BEHIND (Default)
+            // Behind: target - direction * distance
+            camLoc = targetLoc.clone().subtract(direction.clone().multiply(distance));
+            camLoc.add(0, height, 0);
+
+            // Look SAME direction as target
+            camLoc.setDirection(direction);
         }
 
         return camLoc;

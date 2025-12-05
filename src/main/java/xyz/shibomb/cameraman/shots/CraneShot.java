@@ -1,9 +1,9 @@
 package xyz.shibomb.cameraman.shots;
 
 import org.bukkit.Location;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
+import xyz.shibomb.cameraman.targets.CameraTarget;
 
 public class CraneShot implements CameraShot {
 
@@ -20,7 +20,7 @@ public class CraneShot implements CameraShot {
     }
 
     @Override
-    public Location getNextLocation(Player cameraman, Entity target, long tick) {
+    public Location getNextLocation(Player cameraman, CameraTarget target, long tick) {
         long cycleTick = (long) (tick % (durationTicks * 2));
         double t;
 

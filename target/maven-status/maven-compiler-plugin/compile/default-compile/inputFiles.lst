@@ -1,4 +1,5 @@
 /Users/shibomb/Documents/projects/whole-minecraft-cameraman/src/main/java/xyz/shibomb/cameraman/shots/OrbitShot.java
+/Users/shibomb/Documents/projects/whole-minecraft-cameraman/src/main/java/xyz/shibomb/cameraman/shots/MoveShot.java
 /Users/shibomb/Documents/projects/whole-minecraft-cameraman/src/main/java/xyz/shibomb/cameraman/RotationTask.java
 /Users/shibomb/Documents/projects/whole-minecraft-cameraman/src/main/java/xyz/shibomb/cameraman/SmoothTeleportTask.java
 /Users/shibomb/Documents/projects/whole-minecraft-cameraman/src/main/java/xyz/shibomb/cameraman/shots/DynamicFollowShot.java
@@ -9,6 +10,9 @@
 /Users/shibomb/Documents/projects/whole-minecraft-cameraman/src/main/java/xyz/shibomb/cameraman/SpectateTask.java
 /Users/shibomb/Documents/projects/whole-minecraft-cameraman/src/main/java/xyz/shibomb/cameraman/shots/CameraShot.java
 /Users/shibomb/Documents/projects/whole-minecraft-cameraman/src/main/java/xyz/shibomb/cameraman/SpectatePerspective.java
+/Users/shibomb/Documents/projects/whole-minecraft-cameraman/src/main/java/xyz/shibomb/cameraman/targets/LocationTarget.java
+/Users/shibomb/Documents/projects/whole-minecraft-cameraman/src/main/java/xyz/shibomb/cameraman/targets/CameraTarget.java
+/Users/shibomb/Documents/projects/whole-minecraft-cameraman/src/main/java/xyz/shibomb/cameraman/targets/EntityTarget.java
 /Users/shibomb/Documents/projects/whole-minecraft-cameraman/src/main/java/xyz/shibomb/cameraman/shots/FlybyShot.java
 /Users/shibomb/Documents/projects/whole-minecraft-cameraman/src/main/java/xyz/shibomb/cameraman/CameramanManager.java
 /Users/shibomb/Documents/projects/whole-minecraft-cameraman/src/main/java/xyz/shibomb/cameraman/CameramanPlugin.java

@@ -1,3 +1,5 @@
+xyz/shibomb/cameraman/targets/LocationTarget.class
+xyz/shibomb/cameraman/targets/EntityTarget.class
 xyz/shibomb/cameraman/RotationTask.class
 xyz/shibomb/cameraman/SpectateTask.class
 xyz/shibomb/cameraman/shots/FlybyShot.class
@@ -7,9 +9,11 @@ xyz/shibomb/cameraman/CameramanManager$1.class
 xyz/shibomb/cameraman/PlayerJoinListener.class
 xyz/shibomb/cameraman/shots/CameraShot.class
 xyz/shibomb/cameraman/shots/DynamicFollowShot.class
+xyz/shibomb/cameraman/targets/CameraTarget.class
 xyz/shibomb/cameraman/CameramanPlugin.class
 xyz/shibomb/cameraman/shots/CraneShot.class
 xyz/shibomb/cameraman/CameramanCommand.class
 xyz/shibomb/cameraman/CameramanManager.class
 xyz/shibomb/cameraman/shots/OrbitShot.class
 xyz/shibomb/cameraman/SmoothTeleportTask.class
+xyz/shibomb/cameraman/shots/MoveShot.class
