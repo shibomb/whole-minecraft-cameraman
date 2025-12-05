@@ -4,23 +4,20 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
+
+import xyz.shibomb.cameraman.shots.CameraShot;
 
 public class SpectateTask extends BukkitRunnable {
 
     private final Player cameraman;
     private final Entity target;
-    private final SpectatePerspective perspective;
-    private final double distance;
-    private final double height;
+    private final CameraShot cameraShot;
+    private long tick = 0;
 
-    public SpectateTask(Player cameraman, Entity target, SpectatePerspective perspective, double distance,
-            double height) {
+    public SpectateTask(Player cameraman, Entity target, CameraShot cameraShot) {
         this.cameraman = cameraman;
         this.target = target;
-        this.perspective = perspective;
-        this.distance = distance;
-        this.height = height;
+        this.cameraShot = cameraShot;
     }
 
     @Override
@@ -30,32 +27,10 @@ public class SpectateTask extends BukkitRunnable {
             return;
         }
 
-        Location camLoc = calculateViewLocation(target, perspective, distance, height);
+        Location camLoc = cameraShot.getNextLocation(cameraman, target, tick);
         cameraman.teleport(camLoc);
+        tick++;
     }
 
-    public static Location calculateViewLocation(Entity target, SpectatePerspective perspective, double distance,
-            double height) {
-        Location targetLoc = target.getLocation();
-        Location camLoc = targetLoc.clone();
-
-        if (perspective == SpectatePerspective.BEHIND) {
-            // Position behind the target
-            Vector direction = targetLoc.getDirection().normalize().multiply(-distance);
-            camLoc.add(direction);
-            camLoc.add(0, height, 0);
-            camLoc.setDirection(targetLoc.toVector().subtract(camLoc.toVector()));
-        } else if (perspective == SpectatePerspective.FRONT) {
-            // Position in front of the target
-            Vector direction = targetLoc.getDirection().normalize().multiply(distance);
-            camLoc.add(direction);
-            camLoc.add(0, height, 0);
-
-            // Face the target
-            Location lookAt = targetLoc.clone().add(0, 1.5, 0); // Look at head
-            camLoc.setDirection(lookAt.toVector().subtract(camLoc.toVector()));
-        }
-
-        return camLoc;
-    }
+    // Static helper removed in favor of CameraShot interface
 }

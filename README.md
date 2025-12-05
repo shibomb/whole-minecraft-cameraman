@@ -30,16 +30,21 @@ Check out the plugin in action on our 24/7 YouTube Live stream:
 - `/cameraman target <player>`: Manually make the cameraman spectate a specific player.
 - `/cameraman newcomer <true|false>`: Enable/disable Newcomer Mode.
 - `/cameraman rotation <true|false> [interval]`: Enable/disable Rotation Mode. Optional interval in seconds (default: 10s).
-- `/cameraman spectatemode <true|false> [perspective]`: Enable/disable Spectate Mode for players. Optional perspective: POV, BEHIND, FRONT, RANDOM (default: POV). If false, the cameraman teleports to the perspective location without attaching view.
+- `/cameraman spectatemode <true|false> [perspective]`: Enable/disable Spectate Mode for players. Optional perspective: POV, BEHIND, FRONT, RANDOM, ORBIT (default: POV). If false, the cameraman teleports to the perspective location without attaching view.
 
 ### Mob
 - `/cameraman mobtarget <true|false>`: Enable/disable Mob Target Mode.
 - `/cameraman automob <true|false> [delay]`: Enable/disable Auto Mob Target. Optional delay in seconds (default: 5s).
-- `/cameraman mobspectatemode <true|false> [perspective]`: Enable/disable Spectate Mode for mobs. Optional perspective: POV, BEHIND, FRONT, RANDOM (default: POV). If false, the cameraman teleports to the perspective location without attaching view.
+- `/cameraman mobspectatemode <true|false> [perspective]`: Enable/disable Spectate Mode for mobs. Optional perspective: POV, BEHIND, FRONT, RANDOM, ORBIT (default: POV). If false, the cameraman teleports to the perspective location without attaching view.
 - `/cameraman mobnightvision <true|false>`: Enable/disable Mob Night Vision. If true, the cameraman receives Night Vision effect when targeting a mob to improve visibility (default: false).
 - `/cameraman nightvisionthreshold <0-15>`: Set the light level threshold for Adaptive Night Vision. Night Vision is applied if the target's light level is at or below this value (default: 7).
 - `/cameraman distance <value|min-max>`: Set the distance for BEHIND/FRONT perspectives. Can be a fixed number (e.g. 3.0) or a range (e.g. 3.0-6.0) (default: 3.0).
 - `/cameraman height <value|min-max>`: Set the height for BEHIND/FRONT perspectives. Can be a fixed number (e.g. 1.0) or a range (e.g. 1.0-3.0) (default: 1.0).
+- `/cameraman orbitspeed <value|min-max>`: Set the speed for ORBIT perspective (degrees/tick). Can be a fixed number or range (default: 1.0).
+- `/cameraman orbitdirection <LEFT|RIGHT|RANDOM>`: Set the direction for ORBIT perspective (default: LEFT).
+- `/cameraman smoothness <value>`: Set smoothness for DYNAMIC perspective (0.01 - 1.0) (default: 0.1).
+- `/cameraman flybyduration <seconds>`: Set duration for FLYBY loop (default: 5.0).
+- `/cameraman craneduration <seconds>`: Set duration for CRANE loop (default: 5.0).
 
 ## Permissions
 
@@ -77,4 +82,11 @@ showMessage: true
 nightVisionThreshold: 7
 spectateDistance: "3.0"
 spectateHeight: "1.0"
+orbitSpeed: "1.0"
+orbitDirection: "LEFT"
+dynamicSmoothness: "0.1"
+flybyDuration: "5.0"
+craneDuration: "5.0"
+craneHeightMin: "1.0"
+craneHeightMax: "5.0"
 ```

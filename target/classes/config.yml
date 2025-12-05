@@ -49,3 +49,22 @@ spectateDistance: "3.0"
 
 # The height for BEHIND/FRONT perspectives. Can be a fixed number (e.g., "1.0") or a range (e.g., "1.0-3.0").
 spectateHeight: "1.0"
+
+# The speed for ORBIT perspective (degrees per tick). Can be a fixed number or range.
+orbitSpeed: "1.0"
+
+# The direction for ORBIT perspective (LEFT, RIGHT, RANDOM).
+orbitDirection: "LEFT"
+
+# Smoothness for DYNAMIC perspective (0.01 - 1.0). Lower is smoother/slower.
+dynamicSmoothness: "0.1"
+
+# Duration for FLYBY perspective loop (seconds).
+flybyDuration: "5.0"
+
+# Duration for CRANE perspective loop (seconds).
+craneDuration: "5.0"
+
+# Height range for CRANE perspective.
+craneHeightMin: "1.0"
+craneHeightMax: "5.0"

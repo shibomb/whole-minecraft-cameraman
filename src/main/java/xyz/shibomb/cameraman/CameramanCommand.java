@@ -146,7 +146,7 @@ public class CameramanCommand implements CommandExecutor {
                         sender.sendMessage(
                                 "Spectate Mode (Player): " + spectateMode + " (Perspective: " + perspective + ")");
                     } catch (IllegalArgumentException e) {
-                        sender.sendMessage("Invalid perspective. Available: POV, BEHIND, FRONT, RANDOM");
+                        sender.sendMessage("Invalid perspective. Available: POV, BEHIND, FRONT, RANDOM, ORBIT");
                         sender.sendMessage("Spectate Mode (Player): " + spectateMode);
                     }
                 } else {
@@ -169,7 +169,7 @@ public class CameramanCommand implements CommandExecutor {
                         sender.sendMessage(
                                 "Spectate Mode (Mob): " + mobSpectateMode + " (Perspective: " + perspective + ")");
                     } catch (IllegalArgumentException e) {
-                        sender.sendMessage("Invalid perspective. Available: POV, BEHIND, FRONT, RANDOM");
+                        sender.sendMessage("Invalid perspective. Available: POV, BEHIND, FRONT, RANDOM, ORBIT");
                         sender.sendMessage("Spectate Mode (Mob): " + mobSpectateMode);
                     }
                 } else {
@@ -259,6 +259,67 @@ public class CameramanCommand implements CommandExecutor {
                 } catch (NumberFormatException e) {
                     sender.sendMessage("Invalid format. Use a number (e.g. 1.0) or range (e.g. 1.0-3.0).");
                 }
+                break;
+
+            case "orbitspeed":
+                if (args.length < 2) {
+                    sender.sendMessage("Usage: /cameraman orbitspeed <value|min-max>");
+                    return true;
+                }
+                String speed = args[1];
+                try {
+                    if (!speed.contains("-")) {
+                        Double.parseDouble(speed);
+                    } else {
+                        String[] parts = speed.split("-");
+                        if (parts.length != 2)
+                            throw new NumberFormatException();
+                        Double.parseDouble(parts[0].trim());
+                        Double.parseDouble(parts[1].trim());
+                    }
+                    manager.setOrbitSpeed(speed);
+                    sender.sendMessage("Orbit Speed set to: " + speed);
+                } catch (NumberFormatException e) {
+                    sender.sendMessage("Invalid format. Use a number (e.g. 1.0) or range (e.g. 0.5-2.0).");
+                }
+                break;
+
+            case "orbitdirection":
+                if (args.length < 2) {
+                    sender.sendMessage("Usage: /cameraman orbitdirection <LEFT|RIGHT|RANDOM>");
+                    return true;
+                }
+                String direction = args[1].toUpperCase();
+                if (direction.equals("LEFT") || direction.equals("RIGHT") || direction.equals("RANDOM")) {
+                    manager.setOrbitDirection(direction);
+                    sender.sendMessage("Orbit Direction set to: " + direction);
+                } else {
+                    sender.sendMessage("Invalid direction. Use LEFT, RIGHT, or RANDOM.");
+                }
+                break;
+
+            case "smoothness":
+                if (args.length < 2) {
+                    sender.sendMessage("Usage: /cameraman smoothness <value>");
+                    return true;
+                }
+                manager.setDynamicSmoothness(args[1]);
+                break;
+
+            case "flybyduration":
+                if (args.length < 2) {
+                    sender.sendMessage("Usage: /cameraman flybyduration <value> (seconds)");
+                    return true;
+                }
+                manager.setFlybyDuration(args[1]);
+                break;
+
+            case "craneduration":
+                if (args.length < 2) {
+                    sender.sendMessage("Usage: /cameraman craneduration <value> (seconds)");
+                    return true;
+                }
+                manager.setCraneDuration(args[1]);
                 break;
 
             default:

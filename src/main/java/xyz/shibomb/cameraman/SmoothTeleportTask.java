@@ -6,28 +6,26 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
+import xyz.shibomb.cameraman.shots.CameraShot;
+
 public class SmoothTeleportTask extends BukkitRunnable {
 
     private final Player cameraman;
     private final Entity target;
-    private final Location startLocation;
-    private final long durationTicks;
+    private final long totalTicks;
     private final Runnable onComplete;
-    private final SpectatePerspective perspective;
-    private final double distance;
-    private final double height;
+    private final CameraShot cameraShot;
     private long currentTick = 0;
+    private Location startLoc;
 
     public SmoothTeleportTask(Player cameraman, Entity target, long durationTicks, Runnable onComplete,
-            SpectatePerspective perspective, double distance, double height) {
+            CameraShot cameraShot) {
         this.cameraman = cameraman;
         this.target = target;
-        this.startLocation = cameraman.getLocation();
-        this.durationTicks = durationTicks;
+        this.totalTicks = durationTicks;
         this.onComplete = onComplete;
-        this.perspective = perspective;
-        this.distance = distance;
-        this.height = height;
+        this.cameraShot = cameraShot;
+        this.startLoc = cameraman.getLocation();
     }
 
     @Override
@@ -37,27 +35,31 @@ public class SmoothTeleportTask extends BukkitRunnable {
             return;
         }
 
-        if (currentTick >= durationTicks) {
+        if (currentTick >= totalTicks) {
             this.cancel();
             onComplete.run();
             return;
         }
 
-        double t = (double) currentTick / durationTicks;
+        double t = (double) currentTick / totalTicks;
         // Smooth step interpolation for nicer easing
         t = t * t * (3 - 2 * t);
 
-        Location targetLoc = SpectateTask.calculateViewLocation(target, perspective, distance, height);
-        Vector startVec = startLocation.toVector();
+        // Calculate the target position for this frame (or final destination)
+        // For smooth teleport to static shot: target is constant.
+        // For smooth teleport to orbit: target is moving.
+        // We'll aim for the position at tick 0 of the shot.
+        Location targetLoc = cameraShot.getNextLocation(cameraman, target, 0);
+        Vector startVec = startLoc.toVector();
         Vector targetVec = targetLoc.toVector();
 
         // Interpolate position
         Vector currentVec = startVec.clone().add(targetVec.clone().subtract(startVec).multiply(t));
 
-        Location currentLoc = currentVec.toLocation(startLocation.getWorld());
+        Location currentLoc = currentVec.toLocation(startLoc.getWorld());
 
         // Interpolate rotation (yaw/pitch)
-        float startYaw = startLocation.getYaw();
+        float startYaw = startLoc.getYaw();
         float targetYaw = targetLoc.getYaw();
 
         // Handle yaw wrapping (e.g. 350 -> 10 should be +20, not -340)
@@ -68,7 +70,7 @@ public class SmoothTeleportTask extends BukkitRunnable {
             diffYaw -= 360;
 
         float currentYaw = startYaw + (diffYaw * (float) t);
-        float currentPitch = startLocation.getPitch() + ((targetLoc.getPitch() - startLocation.getPitch()) * (float) t);
+        float currentPitch = startLoc.getPitch() + ((targetLoc.getPitch() - startLoc.getPitch()) * (float) t);
 
         currentLoc.setYaw(currentYaw);
         currentLoc.setPitch(currentPitch);

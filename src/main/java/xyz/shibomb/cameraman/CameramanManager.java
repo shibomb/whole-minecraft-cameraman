@@ -12,6 +12,13 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
+import xyz.shibomb.cameraman.shots.CameraShot;
+import xyz.shibomb.cameraman.shots.CraneShot;
+import xyz.shibomb.cameraman.shots.DynamicFollowShot;
+import xyz.shibomb.cameraman.shots.FlybyShot;
+import xyz.shibomb.cameraman.shots.OrbitShot;
+import xyz.shibomb.cameraman.shots.StaticShot;
+
 public class CameramanManager {
 
     private final JavaPlugin plugin;
@@ -40,6 +47,13 @@ public class CameramanManager {
     private BukkitTask lightCheckTask;
     private String spectateDistance = "3.0";
     private String spectateHeight = "1.0";
+    private String orbitSpeed = "1.0";
+    private String orbitDirection = "LEFT";
+    private String dynamicSmoothness = "0.1";
+    private String flybyDuration = "5.0";
+    private String craneDuration = "5.0";
+    private String craneHeightMin = "1.0";
+    private String craneHeightMax = "5.0";
 
     public CameramanManager(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -86,6 +100,13 @@ public class CameramanManager {
         this.nightVisionThreshold = plugin.getConfig().getInt("nightVisionThreshold", 7);
         this.spectateDistance = plugin.getConfig().getString("spectateDistance", "3.0");
         this.spectateHeight = plugin.getConfig().getString("spectateHeight", "1.0");
+        this.orbitSpeed = plugin.getConfig().getString("orbitSpeed", "1.0");
+        this.orbitDirection = plugin.getConfig().getString("orbitDirection", "LEFT");
+        this.dynamicSmoothness = plugin.getConfig().getString("dynamicSmoothness", "0.1");
+        this.flybyDuration = plugin.getConfig().getString("flybyDuration", "5.0");
+        this.craneDuration = plugin.getConfig().getString("craneDuration", "5.0");
+        this.craneHeightMin = plugin.getConfig().getString("craneHeightMin", "1.0");
+        this.craneHeightMax = plugin.getConfig().getString("craneHeightMax", "5.0");
 
         checkAndStartRotationTask();
     }
@@ -194,10 +215,11 @@ public class CameramanManager {
             }
 
             SpectatePerspective activePerspective;
-            if (configPerspective == SpectatePerspective.RANDOM) {
-                SpectatePerspective[] choices = { SpectatePerspective.POV, SpectatePerspective.BEHIND,
-                        SpectatePerspective.FRONT };
-                activePerspective = choices[new Random().nextInt(choices.length)];
+            if ("RANDOM".equalsIgnoreCase(configPerspective.name())) {
+                SpectatePerspective[] perspectives = { SpectatePerspective.POV, SpectatePerspective.BEHIND,
+                        SpectatePerspective.FRONT, SpectatePerspective.ORBIT, SpectatePerspective.DYNAMIC,
+                        SpectatePerspective.FLYBY, SpectatePerspective.CRANE };
+                activePerspective = perspectives[new Random().nextInt(perspectives.length)];
             } else {
                 activePerspective = configPerspective;
             }
@@ -218,7 +240,7 @@ public class CameramanManager {
                         cameraman.setSpectatorTarget(target);
                         sendInfoMessage(cameraman, "Now spectating: " + target.getName() + " (POV)");
                     } else {
-                        // For BEHIND/FRONT, we don't use setSpectatorTarget (it forces POV)
+                        // For BEHIND/FRONT/ORBIT, we don't use setSpectatorTarget (it forces POV)
                         // Instead we start the positioning task
                         cameraman.setSpectatorTarget(null);
                         startSpectateTask(cameraman, target, activePerspective, maxDist, maxHeight);
@@ -237,8 +259,9 @@ public class CameramanManager {
 
             if (teleportSmooth) {
                 sendInfoMessage(cameraman, "Moving to " + target.getName() + "...");
+                CameraShot shot = createCameraShot(activePerspective, maxDist, maxHeight);
                 currentTeleportTask = new SmoothTeleportTask(cameraman, target, teleportSmoothDuration * 20L,
-                        onTargetSet, activePerspective, maxDist, maxHeight);
+                        onTargetSet, shot);
                 currentTeleportTask.runTaskTimer(plugin, 0L, 1L);
             } else {
                 boolean activeSpectateMode = (target instanceof Player) ? spectateMode : mobSpectateMode;
@@ -246,8 +269,8 @@ public class CameramanManager {
                     onTargetSet.run();
                 } else {
                     // Instant teleport with perspective
-                    Location targetLoc = SpectateTask.calculateViewLocation(target, activePerspective, maxDist,
-                            maxHeight);
+                    CameraShot shot = createCameraShot(activePerspective, maxDist, maxHeight);
+                    Location targetLoc = shot.getNextLocation(cameraman, target, 0); // Get initial position
                     cameraman.teleport(targetLoc);
                     sendInfoMessage(cameraman, "Moved to: " + target.getName());
 
@@ -510,8 +533,41 @@ public class CameramanManager {
     private void startSpectateTask(Player cameraman, org.bukkit.entity.Entity target, SpectatePerspective perspective,
             double distance, double height) {
         stopSpectateTask();
-        spectateTask = new SpectateTask(cameraman, target, perspective, distance, height);
+        CameraShot shot = createCameraShot(perspective, distance, height);
+        spectateTask = new SpectateTask(cameraman, target, shot);
         spectateTask.runTaskTimer(plugin, 0L, 1L);
+    }
+
+    private CameraShot createCameraShot(SpectatePerspective perspective, double distance, double height) {
+        if (perspective == SpectatePerspective.ORBIT) {
+            double speed = parseAndCalculate(orbitSpeed);
+            boolean isRight = false;
+
+            if ("RANDOM".equalsIgnoreCase(orbitDirection)) {
+                isRight = new Random().nextBoolean();
+            } else if ("RIGHT".equalsIgnoreCase(orbitDirection)) {
+                isRight = true;
+            }
+
+            if (isRight) {
+                speed = -speed; // Negative speed for RIGHT orbit (assuming positive is LEFT/CCW)
+            }
+
+            return new OrbitShot(distance, speed, height);
+        } else if (perspective == SpectatePerspective.DYNAMIC) {
+            double smooth = Double.parseDouble(dynamicSmoothness);
+            return new DynamicFollowShot(distance, height, smooth);
+        } else if (perspective == SpectatePerspective.FLYBY) {
+            double dur = Double.parseDouble(flybyDuration);
+            return new FlybyShot(dur);
+        } else if (perspective == SpectatePerspective.CRANE) {
+            double dur = Double.parseDouble(craneDuration);
+            double min = Double.parseDouble(craneHeightMin);
+            double max = Double.parseDouble(craneHeightMax);
+            return new CraneShot(dur, min, max, distance);
+        } else {
+            return new StaticShot(perspective, distance, height);
+        }
     }
 
     private void stopSpectateTask() {
@@ -578,7 +634,7 @@ public class CameramanManager {
 
     private double parseAndCalculate(String value) {
         if (value == null)
-            return 3.0;
+            return 3.0; // Fallback matches default logic
         try {
             if (value.contains("-")) {
                 String[] parts = value.split("-");
@@ -597,5 +653,53 @@ public class CameramanManager {
         } catch (NumberFormatException e) {
             return 3.0; // Fallback default
         }
+    }
+
+    public void setOrbitSpeed(String speed) {
+        this.orbitSpeed = speed;
+        plugin.getConfig().set("orbitSpeed", speed);
+        plugin.saveConfig();
+        Player cameraman = getCameraman();
+        if (cameraman != null) {
+            cameraman.sendMessage("Orbit Speed set to: " + speed);
+        }
+    }
+
+    public void setOrbitDirection(String direction) {
+        this.orbitDirection = direction;
+        plugin.getConfig().set("orbitDirection", direction);
+        plugin.saveConfig();
+        Player cameraman = getCameraman();
+        if (cameraman != null) {
+            cameraman.sendMessage("Orbit Direction set to: " + direction);
+        }
+    }
+
+    // Setters for new configs could go here, omitting for brevity/task balance
+    // unless requested.
+    // Actually, I'll add them to support the commands I planned.
+
+    public void setDynamicSmoothness(String val) {
+        this.dynamicSmoothness = val;
+        plugin.getConfig().set("dynamicSmoothness", val);
+        plugin.saveConfig();
+        if (getCameraman() != null)
+            getCameraman().sendMessage("Dynamic Smoothness: " + val);
+    }
+
+    public void setFlybyDuration(String val) {
+        this.flybyDuration = val;
+        plugin.getConfig().set("flybyDuration", val);
+        plugin.saveConfig();
+        if (getCameraman() != null)
+            getCameraman().sendMessage("Flyby Duration: " + val);
+    }
+
+    public void setCraneDuration(String val) {
+        this.craneDuration = val;
+        plugin.getConfig().set("craneDuration", val);
+        plugin.saveConfig();
+        if (getCameraman() != null)
+            getCameraman().sendMessage("Crane Duration: " + val);
     }
 }
