@@ -68,7 +68,7 @@ Check out the plugin in action on our 24/7 YouTube Live stream:
 - `/cameraman craneheightmax <value>`: Set maximum height (default: 5.0).
 
 #### Move
-- `/cameraman movedirection <x,y,z>`: Set direction vector (e.g., 1,0,0). Supports ranges.
+- `/cameraman movedirection <x,y,z>`: Set direction vector relative to the camera's starting orientation (X=Right, Y=Up, Z=Forward). Supports ranges (e.g. "0.5-1.0").
 - `/cameraman movespeed <value|min-max>`: Set speed (blocks/tick) (default: 0.1).
 
 ### Scenic Mode (Targetless Cinematics)
@@ -98,6 +98,8 @@ This plugin offers various camera modes ("Perspectives") for spectating:
   - Configurable via `flybyDuration`.
 - **CRANE**: The camera moves vertically (up and down) while maintaining a fixed horizontal distance. Great for establishing shots.
   - Configurable via `distance`, `craneDuration`, `craneHeightMin`, and `craneHeightMax`.
+- **MOVE**: The camera moves linearly in a specified direction relative to the start orientation.
+  - Configurable via `movedirection` (X=Right, Y=Up, Z=Forward), `movespeed`, `distance` (start offset back), and `height` (start offset up).
 - **RANDOM**: Automatically selects one of the above perspectives (including cinematic ones) at random each time a new target is chosen from the rotation list.
 
 > **Note**: If `spectatemode` or `mobspectatemode` is set to `false`, these perspectives will only teleport the cameraman to the **starting position** of the shot. Dynamic effects like orbiting or flying by require spectate mode to be enabled (true).
