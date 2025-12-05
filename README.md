@@ -1,8 +1,8 @@
 ![Cameraman Plugin Icon](icon.png)
 
-# Cameraman Plugin
+# Cinematic Cameraman Plugin
 
-A Minecraft Paper plugin that allows a designated player to act as a "Cameraman", automatically spectating players with various modes.
+A Minecraft Paper plugin that allows a designated player to act as a "Cinematic Cameraman", automatically spectating players with various modes.
 
 ## Live Demo
 
