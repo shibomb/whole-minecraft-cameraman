@@ -9,6 +9,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 public class CameramanManager {
@@ -37,6 +38,8 @@ public class CameramanManager {
     private org.bukkit.potion.PotionEffect previousNightVisionEffect = null;
     private long previousNightVisionTime = 0;
     private BukkitTask lightCheckTask;
+    private String spectateDistance = "3.0";
+    private String spectateHeight = "1.0";
 
     public CameramanManager(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -80,6 +83,9 @@ public class CameramanManager {
         this.mobNightVision = plugin.getConfig().getBoolean("mobNightVision", false);
         this.showMessage = plugin.getConfig().getBoolean("showMessage", true);
         this.nightVisionThreshold = plugin.getConfig().getInt("nightVisionThreshold", 7);
+        this.nightVisionThreshold = plugin.getConfig().getInt("nightVisionThreshold", 7);
+        this.spectateDistance = plugin.getConfig().getString("spectateDistance", "3.0");
+        this.spectateHeight = plugin.getConfig().getString("spectateHeight", "1.0");
 
         checkAndStartRotationTask();
     }
@@ -180,12 +186,24 @@ public class CameramanManager {
             cameraman.setSpectatorTarget(null); // Reset first
 
             // Determine active perspective
-            SpectatePerspective activePerspective;
+            SpectatePerspective configPerspective;
             if (target instanceof Player) {
-                activePerspective = spectatePerspective;
+                configPerspective = spectatePerspective;
             } else {
-                activePerspective = mobSpectatePerspective;
+                configPerspective = mobSpectatePerspective;
             }
+
+            SpectatePerspective activePerspective;
+            if (configPerspective == SpectatePerspective.RANDOM) {
+                SpectatePerspective[] choices = { SpectatePerspective.POV, SpectatePerspective.BEHIND,
+                        SpectatePerspective.FRONT };
+                activePerspective = choices[new Random().nextInt(choices.length)];
+            } else {
+                activePerspective = configPerspective;
+            }
+
+            double maxDist = parseAndCalculate(spectateDistance);
+            double maxHeight = parseAndCalculate(spectateHeight);
 
             Runnable onTargetSet = () -> {
                 boolean activeSpectateMode;
@@ -203,7 +221,7 @@ public class CameramanManager {
                         // For BEHIND/FRONT, we don't use setSpectatorTarget (it forces POV)
                         // Instead we start the positioning task
                         cameraman.setSpectatorTarget(null);
-                        startSpectateTask(cameraman, target, activePerspective);
+                        startSpectateTask(cameraman, target, activePerspective, maxDist, maxHeight);
                         sendInfoMessage(cameraman,
                                 "Now spectating: " + target.getName() + " (" + activePerspective + ")");
                     }
@@ -220,7 +238,7 @@ public class CameramanManager {
             if (teleportSmooth) {
                 sendInfoMessage(cameraman, "Moving to " + target.getName() + "...");
                 currentTeleportTask = new SmoothTeleportTask(cameraman, target, teleportSmoothDuration * 20L,
-                        onTargetSet, activePerspective);
+                        onTargetSet, activePerspective, maxDist, maxHeight);
                 currentTeleportTask.runTaskTimer(plugin, 0L, 1L);
             } else {
                 boolean activeSpectateMode = (target instanceof Player) ? spectateMode : mobSpectateMode;
@@ -228,7 +246,8 @@ public class CameramanManager {
                     onTargetSet.run();
                 } else {
                     // Instant teleport with perspective
-                    Location targetLoc = SpectateTask.calculateViewLocation(target, activePerspective);
+                    Location targetLoc = SpectateTask.calculateViewLocation(target, activePerspective, maxDist,
+                            maxHeight);
                     cameraman.teleport(targetLoc);
                     sendInfoMessage(cameraman, "Moved to: " + target.getName());
 
@@ -488,9 +507,10 @@ public class CameramanManager {
         }
     }
 
-    private void startSpectateTask(Player cameraman, org.bukkit.entity.Entity target, SpectatePerspective perspective) {
+    private void startSpectateTask(Player cameraman, org.bukkit.entity.Entity target, SpectatePerspective perspective,
+            double distance, double height) {
         stopSpectateTask();
-        spectateTask = new SpectateTask(cameraman, target, perspective);
+        spectateTask = new SpectateTask(cameraman, target, perspective, distance, height);
         spectateTask.runTaskTimer(plugin, 0L, 1L);
     }
 
@@ -531,6 +551,51 @@ public class CameramanManager {
         Player cameraman = getCameraman();
         if (cameraman != null) {
             cameraman.sendMessage("Night Vision Threshold set to: " + threshold);
+        }
+    }
+
+    public void setSpectateDistance(String distance) {
+        this.spectateDistance = distance;
+        plugin.getConfig().set("spectateDistance", distance);
+        plugin.saveConfig();
+
+        Player cameraman = getCameraman();
+        if (cameraman != null) {
+            cameraman.sendMessage("Spectate Distance set to: " + distance);
+        }
+    }
+
+    public void setSpectateHeight(String height) {
+        this.spectateHeight = height;
+        plugin.getConfig().set("spectateHeight", height);
+        plugin.saveConfig();
+
+        Player cameraman = getCameraman();
+        if (cameraman != null) {
+            cameraman.sendMessage("Spectate Height set to: " + height);
+        }
+    }
+
+    private double parseAndCalculate(String value) {
+        if (value == null)
+            return 3.0;
+        try {
+            if (value.contains("-")) {
+                String[] parts = value.split("-");
+                if (parts.length == 2) {
+                    double min = Double.parseDouble(parts[0].trim());
+                    double max = Double.parseDouble(parts[1].trim());
+                    if (min > max) {
+                        double temp = min;
+                        min = max;
+                        max = temp;
+                    }
+                    return min + (new Random().nextDouble() * (max - min));
+                }
+            }
+            return Double.parseDouble(value);
+        } catch (NumberFormatException e) {
+            return 3.0; // Fallback default
         }
     }
 }

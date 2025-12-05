@@ -41,4 +41,11 @@ spectatePerspective: POV
 mobSpectateMode: true
 
 # The perspective for Mob Spectate Mode (POV, BEHIND, FRONT).
+# The perspective for Mob Spectate Mode (POV, BEHIND, FRONT, RANDOM).
 mobSpectatePerspective: POV
+
+# The distance for BEHIND/FRONT perspectives. Can be a fixed number (e.g., "3.0") or a range (e.g., "3.0-6.0").
+spectateDistance: "3.0"
+
+# The height for BEHIND/FRONT perspectives. Can be a fixed number (e.g., "1.0") or a range (e.g., "1.0-3.0").
+spectateHeight: "1.0"

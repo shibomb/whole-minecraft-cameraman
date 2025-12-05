@@ -146,7 +146,7 @@ public class CameramanCommand implements CommandExecutor {
                         sender.sendMessage(
                                 "Spectate Mode (Player): " + spectateMode + " (Perspective: " + perspective + ")");
                     } catch (IllegalArgumentException e) {
-                        sender.sendMessage("Invalid perspective. Available: POV, BEHIND, FRONT");
+                        sender.sendMessage("Invalid perspective. Available: POV, BEHIND, FRONT, RANDOM");
                         sender.sendMessage("Spectate Mode (Player): " + spectateMode);
                     }
                 } else {
@@ -169,7 +169,7 @@ public class CameramanCommand implements CommandExecutor {
                         sender.sendMessage(
                                 "Spectate Mode (Mob): " + mobSpectateMode + " (Perspective: " + perspective + ")");
                     } catch (IllegalArgumentException e) {
-                        sender.sendMessage("Invalid perspective. Available: POV, BEHIND, FRONT");
+                        sender.sendMessage("Invalid perspective. Available: POV, BEHIND, FRONT, RANDOM");
                         sender.sendMessage("Spectate Mode (Mob): " + mobSpectateMode);
                     }
                 } else {
@@ -210,6 +210,54 @@ public class CameramanCommand implements CommandExecutor {
                     sender.sendMessage("Night Vision Threshold: " + threshold);
                 } catch (NumberFormatException e) {
                     sender.sendMessage("Invalid number format.");
+                }
+                break;
+
+            case "distance":
+                if (args.length < 2) {
+                    sender.sendMessage("Usage: /cameraman distance <value|min-max>");
+                    return true;
+                }
+                String distance = args[1];
+                // Optional: Validate format here, but manager handles parsing safely
+                try {
+                    // Check if it's a number or a range
+                    if (!distance.contains("-")) {
+                        Double.parseDouble(distance);
+                    } else {
+                        String[] parts = distance.split("-");
+                        if (parts.length != 2)
+                            throw new NumberFormatException();
+                        Double.parseDouble(parts[0].trim());
+                        Double.parseDouble(parts[1].trim());
+                    }
+                    manager.setSpectateDistance(distance);
+                    sender.sendMessage("Spectate Distance: " + distance);
+                } catch (NumberFormatException e) {
+                    sender.sendMessage("Invalid format. Use a number (e.g. 3.0) or range (e.g. 3.0-6.0).");
+                }
+                break;
+
+            case "height":
+                if (args.length < 2) {
+                    sender.sendMessage("Usage: /cameraman height <value|min-max>");
+                    return true;
+                }
+                String height = args[1];
+                try {
+                    if (!height.contains("-")) {
+                        Double.parseDouble(height);
+                    } else {
+                        String[] parts = height.split("-");
+                        if (parts.length != 2)
+                            throw new NumberFormatException();
+                        Double.parseDouble(parts[0].trim());
+                        Double.parseDouble(parts[1].trim());
+                    }
+                    manager.setSpectateHeight(height);
+                    sender.sendMessage("Spectate Height: " + height);
+                } catch (NumberFormatException e) {
+                    sender.sendMessage("Invalid format. Use a number (e.g. 1.0) or range (e.g. 1.0-3.0).");
                 }
                 break;
 
