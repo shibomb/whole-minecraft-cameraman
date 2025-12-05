@@ -146,7 +146,8 @@ public class CameramanCommand implements CommandExecutor {
                         sender.sendMessage(
                                 "Spectate Mode (Player): " + spectateMode + " (Perspective: " + perspective + ")");
                     } catch (IllegalArgumentException e) {
-                        sender.sendMessage("Invalid perspective. Available: POV, BEHIND, FRONT, RANDOM, ORBIT");
+                        sender.sendMessage(
+                                "Invalid perspective. Available: POV, BEHIND, FRONT, RANDOM, ORBIT, DYNAMIC, FLYBY, CRANE");
                         sender.sendMessage("Spectate Mode (Player): " + spectateMode);
                     }
                 } else {
@@ -169,7 +170,8 @@ public class CameramanCommand implements CommandExecutor {
                         sender.sendMessage(
                                 "Spectate Mode (Mob): " + mobSpectateMode + " (Perspective: " + perspective + ")");
                     } catch (IllegalArgumentException e) {
-                        sender.sendMessage("Invalid perspective. Available: POV, BEHIND, FRONT, RANDOM, ORBIT");
+                        sender.sendMessage(
+                                "Invalid perspective. Available: POV, BEHIND, FRONT, RANDOM, ORBIT, DYNAMIC, FLYBY, CRANE");
                         sender.sendMessage("Spectate Mode (Mob): " + mobSpectateMode);
                     }
                 } else {

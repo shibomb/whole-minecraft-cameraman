@@ -30,12 +30,12 @@ Check out the plugin in action on our 24/7 YouTube Live stream:
 - `/cameraman target <player>`: Manually make the cameraman spectate a specific player.
 - `/cameraman newcomer <true|false>`: Enable/disable Newcomer Mode.
 - `/cameraman rotation <true|false> [interval]`: Enable/disable Rotation Mode. Optional interval in seconds (default: 10s).
-- `/cameraman spectatemode <true|false> [perspective]`: Enable/disable Spectate Mode for players. Optional perspective: POV, BEHIND, FRONT, RANDOM, ORBIT (default: POV). If false, the cameraman teleports to the perspective location without attaching view.
+- `/cameraman spectatemode <true|false> [perspective]`: Enable/disable Spectate Mode for players. Optional perspective: POV, BEHIND, FRONT, RANDOM, ORBIT, DYNAMIC, FLYBY, CRANE (default: POV). If false, the cameraman teleports to the perspective location without attaching view.
 
 ### Mob
 - `/cameraman mobtarget <true|false>`: Enable/disable Mob Target Mode.
 - `/cameraman automob <true|false> [delay]`: Enable/disable Auto Mob Target. Optional delay in seconds (default: 5s).
-- `/cameraman mobspectatemode <true|false> [perspective]`: Enable/disable Spectate Mode for mobs. Optional perspective: POV, BEHIND, FRONT, RANDOM, ORBIT (default: POV). If false, the cameraman teleports to the perspective location without attaching view.
+- `/cameraman mobspectatemode <true|false> [perspective]`: Enable/disable Spectate Mode for mobs. Optional perspective: POV, BEHIND, FRONT, RANDOM, ORBIT, DYNAMIC, FLYBY, CRANE (default: POV). If false, the cameraman teleports to the perspective location without attaching view.
 - `/cameraman mobnightvision <true|false>`: Enable/disable Mob Night Vision. If true, the cameraman receives Night Vision effect when targeting a mob to improve visibility (default: false).
 - `/cameraman nightvisionthreshold <0-15>`: Set the light level threshold for Adaptive Night Vision. Night Vision is applied if the target's light level is at or below this value (default: 7).
 - `/cameraman distance <value|min-max>`: Set the distance for BEHIND/FRONT perspectives. Can be a fixed number (e.g. 3.0) or a range (e.g. 3.0-6.0) (default: 3.0).
@@ -45,6 +45,27 @@ Check out the plugin in action on our 24/7 YouTube Live stream:
 - `/cameraman smoothness <value>`: Set smoothness for DYNAMIC perspective (0.01 - 1.0) (default: 0.1).
 - `/cameraman flybyduration <seconds>`: Set duration for FLYBY loop (default: 5.0).
 - `/cameraman craneduration <seconds>`: Set duration for CRANE loop (default: 5.0).
+
+- `/cameraman craneduration <seconds>`: Set duration for CRANE loop (default: 5.0).
+
+## Perspectives
+
+This plugin offers various camera modes ("Perspectives") for spectating:
+
+- **POV**: First-person view (standard Spectator mode).
+- **BEHIND**: Fixed position behind the target.
+  - Configurable via `distance` and `height`.
+- **FRONT**: Fixed position in front of the target, looking back at them.
+  - Configurable via `distance` and `height`.
+- **ORBIT**: The camera circles around the target at a fixed distance.
+  - Configurable via `distance` (radius), `height`, `orbitSpeed`, and `orbitDirection`.
+- **DYNAMIC**: A smooth "tracking" shot. The camera lags slightly behind the target (spring-arm effect), smoothing out sudden rotations and movements.
+  - Configurable via `distance`, `height`, and `dynamicSmoothness` (0.01-1.0).
+- **FLYBY**: The camera moves continuously between two points relative to the target (e.g., flying past them). Loops back and forth.
+  - Configurable via `flybyDuration`.
+- **CRANE**: The camera moves vertically (up and down) while maintaining a fixed horizontal distance. Great for establishing shots.
+  - Configurable via `distance`, `craneDuration`, `craneHeightMin`, and `craneHeightMax`.
+- **RANDOM**: Automatically selects one of the above perspectives (including cinematic ones) at random each time a new target is chosen from the rotation list.
 
 ## Permissions
 
