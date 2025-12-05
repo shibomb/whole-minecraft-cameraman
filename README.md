@@ -14,6 +14,7 @@ Check out the plugin in action on our 24/7 YouTube Live stream:
 - **Rotation Mode**: Automatically cycle through online players at a configurable interval.
 - **Mob Target Mode**: Spectate nearby mobs (living entities) instead of players.
 - **Auto Mob Target**: Automatically switch to Mob Target Mode when no players are available to spectate.
+- **Auto Scenic Mode**: Automatically start a scenic shot (no target) after teleporting to a location (e.g. from Auto Mob Target) if spectate mode is disabled.
 - **Smooth Teleport**: Smoothly interpolate the camera position when switching targets for a cinematic effect.
 - **Persistence**: The cameraman role and all mode settings are saved and restored even after server restarts or player reconnections.
 - **Smart Restoration**: If the cameraman disconnects and reconnects, their state and active modes are automatically restored.
@@ -69,7 +70,6 @@ Check out the plugin in action on our 24/7 YouTube Live stream:
 #### Move
 - `/cameraman movedirection <x,y,z>`: Set direction vector (e.g., 1,0,0). Supports ranges.
 - `/cameraman movespeed <value|min-max>`: Set speed (blocks/tick) (default: 0.1).
-- `/cameraman moveduration <seconds>`: Set loop duration (default: 30.0).
 
 ### Scenic Mode (Targetless Cinematics)
 Target a static location instead of a player/mob.

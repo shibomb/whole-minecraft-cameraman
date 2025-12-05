@@ -635,6 +635,9 @@ public class CameramanManager {
             }
         }
 
+        // Display the resolved perspective
+        sendInfoMessage(cameraman, "Scenic Perspective: " + actualPerspective.name());
+
         // Parse configs directly or reuse existing fields?
         // We can reuse the fields.
         double distance = parseAndCalculate(spectateDistance);
