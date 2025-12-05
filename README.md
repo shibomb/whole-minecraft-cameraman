@@ -29,13 +29,13 @@ Check out the plugin in action on our 24/7 YouTube Live stream:
 ### Targeting
 - `/cameraman target <player>`: Manually make the cameraman spectate a specific player.
 - `/cameraman newcomer <true|false>`: Enable/disable Newcomer Mode (auto-spectate newly joined players).
-- `/cameraman rotation <true|false> [interval]`: Enable/disable Rotation Mode (cycle targets). Optional interval in seconds (default: 10s).
+- `/cameraman rotation <true|false> [interval]`: Enable/disable Rotation Mode (cycle targets). Optional interval in seconds (default: 30s).
 - `/cameraman mobtarget <true|false>`: Enable/disable Mob Target Mode (spectate mobs instead of players).
-- `/cameraman automob <true|false> [delay]`: Enable/disable Auto Mob Target (switch to mobs if no players). Optional delay in seconds (default: 5s).
+- `/cameraman automob <true|false> [delay]`: Enable/disable Auto Mob Target (switch to mobs if no players). Optional delay in seconds (default: 60s).
 
 ### Spectating
-- `/cameraman spectatemode <true|false> [perspective]`: Enable/disable Spectate Mode for **players**. Optional perspective (default: POV).
-- `/cameraman mobspectatemode <true|false> [perspective]`: Enable/disable Spectate Mode for **mobs**. Optional perspective (default: POV).
+- `/cameraman spectatemode <true|false> [perspective]`: Enable/disable Spectate Mode for **players**. Optional perspective (default: RANDOM).
+- `/cameraman mobspectatemode <true|false> [perspective]`: Enable/disable Spectate Mode for **mobs**. Optional perspective (default: RANDOM).
 - `/cameraman teleportsmooth <true|false> [duration]`: Enable/disable Smooth Teleport (interpolate position when switching targets). Optional duration in seconds (default: 3s).
 - `/cameraman mobnightvision <true|false>`: Enable/disable Mob Night Vision (Night Vision effect when targeting mobs).
 - `/cameraman nightvisionthreshold <0-15>`: Set threshold for Adaptive Night Vision (applied if light level <= value) (default: 7).
@@ -49,11 +49,11 @@ Check out the plugin in action on our 24/7 YouTube Live stream:
 *Settings apply to the relevant perspectives (BEHIND, FRONT, ORBIT, DYNAMIC, FLYBY, CRANE, MOVE).*
 
 #### General
-- `/cameraman distance <value|min-max>`: Set distance (BEHIND, FRONT, ORBIT, FLYBY, CRANE) (default: 3.0).
-- `/cameraman height <value|min-max>`: Set height (BEHIND, FRONT, ORBIT, DYNAMIC) (default: 1.0).
+- `/cameraman distance <value|min-max>`: Set distance (BEHIND, FRONT, ORBIT, FLYBY, CRANE) (default: 3.0-5.0).
+- `/cameraman height <value|min-max>`: Set height (BEHIND, FRONT, ORBIT, DYNAMIC) (default: 0.0-1.0).
 
 #### Orbit
-- `/cameraman orbitspeed <value|min-max>`: Set speed (degrees/tick) (default: 0.2).
+- `/cameraman orbitspeed <value|min-max>`: Set speed (degrees/tick) (default: 0.1).
 - `/cameraman orbitdirection <LEFT|RIGHT|RANDOM>`: Set direction (default: RANDOM).
 
 #### Dynamic
@@ -69,7 +69,7 @@ Check out the plugin in action on our 24/7 YouTube Live stream:
 
 #### Move
 - `/cameraman movedirection <x,y,z>`: Set direction vector relative to the camera's starting orientation (X=Right, Y=Up, Z=Forward). Supports ranges (e.g. "0.5-1.0").
-- `/cameraman movespeed <value|min-max>`: Set speed (blocks/tick) (default: 0.1).
+- `/cameraman movespeed <value|min-max>`: Set speed (blocks/tick) (default: 0.01).
 
 ### Scenic Mode (Targetless Cinematics)
 Target a static location instead of a player/mob.
@@ -123,26 +123,26 @@ The `config.yml` stores the UUID of the current cameraman and all mode settings 
 
 ```yaml
 cameraman: <UUID>
-newcomerMode: false
-rotationMode: false
-rotationInterval: 10
+newcomerMode: true
+rotationMode: true
+rotationInterval: 30
 mobTargetMode: false
-autoMobTarget: false
-autoMobTargetDelay: 5
-autoScenic: false
-autoScenicPerspective: ORBIT
+autoMobTarget: true
+autoMobTargetDelay: 60
+autoScenic: true
+autoScenicPerspective: RANDOM
 teleportSmooth: false
 teleportSmoothDuration: 3
 spectateMode: true
-spectatePerspective: POV
+spectatePerspective: RANDOM
 mobSpectateMode: true
-mobSpectatePerspective: POV
+mobSpectatePerspective: RANDOM
 mobNightVision: false
 showMessage: true
 nightVisionThreshold: 7
-spectateDistance: "3.0"
-spectateHeight: "1.0"
-orbitSpeed: "0.2"
+spectateDistance: "3.0-5.0"
+spectateHeight: "0.0-1.0"
+orbitSpeed: "0.1"
 orbitDirection: "RANDOM"
 dynamicSmoothness: "0.1"
 flybyDuration: "30.0"
@@ -150,15 +150,14 @@ craneDuration: "30.0"
 craneHeightMin: "1.0"
 craneHeightMax: "5.0"
 moveX: "-1-1"
-moveY: "0"
-moveZ: "-1-1"
-moveSpeed: "0.1"
+moveY: "0-0.1"
+moveZ: "-0.1-0.1"
+moveSpeed: "0.01"
 randomPlayerPerspectives:
   - POV
   - BEHIND
   - FRONT
   - ORBIT
-  - DYNAMIC
   - FLYBY
   - MOVE
   - CRANE
