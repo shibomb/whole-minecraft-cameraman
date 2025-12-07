@@ -1,9 +1,7 @@
 package xyz.shibomb.cameraman;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -42,6 +40,11 @@ public class CameramanCommand implements CommandExecutor {
                 }
                 manager.setCameraman(player);
                 sender.sendMessage("Cameraman set to " + player.getName());
+                break;
+
+            case "unset":
+                manager.removeCameraman();
+                sender.sendMessage("Cameraman unset.");
                 break;
 
             case "target":

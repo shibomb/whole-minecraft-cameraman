@@ -24,12 +24,12 @@ Check out the plugin in action on our 24/7 YouTube Live stream:
 ## Commands
 
 ### Management
-- `/cameraman set <player>`: Set the specified player as the cameraman.
-- `/cameraman clear`: Stop spectating the current target.
+- `/cameraman set <player>`: Set the player who will act as the cameraman.
+- `/cameraman unset`: Unset the current cameraman and return them to Survival mode.
+- `/cameraman target <player>`: Manually set the target for the cameraman to follow.
 - `/cameraman showmessage <true|false>`: Enable/disable informational messages (e.g., "Moving to...", "Now spectating..."). Command feedback is still shown (default: true).
 
 ### Targeting
-- `/cameraman target <player>`: Manually make the cameraman spectate a specific player.
 - `/cameraman newcomer <true|false>`: Enable/disable Newcomer Mode (auto-spectate newly joined players).
 - `/cameraman rotation <true|false> [interval]`: Enable/disable Rotation Mode (cycle targets). Optional interval in seconds (default: 30s).
 - `/cameraman mobtarget <true|false>`: Enable/disable Mob Target Mode (spectate mobs instead of players).

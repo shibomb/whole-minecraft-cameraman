@@ -19,7 +19,6 @@ import xyz.shibomb.cameraman.shots.DynamicFollowShot;
 import xyz.shibomb.cameraman.shots.FlybyShot;
 import xyz.shibomb.cameraman.shots.OrbitShot;
 import xyz.shibomb.cameraman.shots.StaticShot;
-import xyz.shibomb.cameraman.targets.CameraTarget;
 import xyz.shibomb.cameraman.targets.EntityTarget;
 import xyz.shibomb.cameraman.targets.LocationTarget;
 import xyz.shibomb.cameraman.shots.MoveShot;
@@ -207,6 +206,19 @@ public class CameramanManager {
             player.setGameMode(GameMode.SPECTATOR);
             player.sendMessage("Welcome back, Cameraman!");
 
+        }
+    }
+
+    public void removeCameraman() {
+        if (cameramanId != null) {
+            Player cameraman = Bukkit.getPlayer(cameramanId);
+            if (cameraman != null) {
+                cameraman.setGameMode(GameMode.SURVIVAL);
+                cameraman.sendMessage("You are no longer the cameraman.");
+            }
+            cameramanId = null;
+            plugin.getConfig().set("cameraman", null);
+            plugin.saveConfig();
         }
     }
 
@@ -768,16 +780,17 @@ public class CameramanManager {
         }
     }
 
+    // Regex for range: (number)-(number)
+    // Supports negative numbers e.g. -1.5--0.5, -5-5
+    // Group 1: Min, Group 3: Max
+    private static final java.util.regex.Pattern RANGE_PATTERN = java.util.regex.Pattern
+            .compile("^((-?\\d+(\\.\\d+)?))-((-?\\d+(\\.\\d+)?))$");
+
     private double parseAndCalculate(String value) {
         if (value == null)
             return 3.0; // Fallback matches default logic
         try {
-            // Regex for range: (number)-(number)
-            // Supports negative numbers e.g. -1.5--0.5, -5-5
-            // Group 1: Min, Group 3: Max (skipping inner groups for decimals)
-            java.util.regex.Pattern rangePattern = java.util.regex.Pattern
-                    .compile("^((-?\\d+(\\.\\d+)?))-((-?\\d+(\\.\\d+)?))$");
-            java.util.regex.Matcher matcher = rangePattern.matcher(value.trim());
+            java.util.regex.Matcher matcher = RANGE_PATTERN.matcher(value.trim());
 
             if (matcher.matches()) {
                 double min = Double.parseDouble(matcher.group(1));
@@ -850,7 +863,6 @@ public class CameramanManager {
 
     public void setRandomPerspectives(String type, List<String> perspectives) {
         String path;
-        List<SpectatePerspective> targetList;
         if (type.equalsIgnoreCase("player")) {
             path = "randomPlayerPerspectives";
         } else if (type.equalsIgnoreCase("mob")) {

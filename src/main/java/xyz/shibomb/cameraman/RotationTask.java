@@ -33,7 +33,9 @@ public class RotationTask extends BukkitRunnable {
                     long timeSinceLastPlayer = System.currentTimeMillis() - manager.getLastPlayerTargetTime();
                     if (timeSinceLastPlayer > manager.getAutoMobTargetDelay() * 1000) {
                         manager.setMobTargetMode(true);
-                        manager.getCameraman().sendMessage("Auto-switched to Mob Target Mode due to inactivity.");
+                        if (manager.getCameraman() != null) {
+                            manager.getCameraman().sendMessage("Auto-switched to Mob Target Mode due to inactivity.");
+                        }
                     }
                 }
                 return;

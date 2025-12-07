@@ -30,10 +30,13 @@ public class OrbitShot implements CameraShot {
         double x = Math.cos(radians) * radius;
         double z = Math.sin(radians) * radius;
 
-        Location camLoc = targetLoc.clone().add(x, height, z);
+        // Clone target location once
+        Location camLoc = targetLoc.clone();
+        camLoc.add(x, height, z);
 
         // Look at target's head
-        Location lookAt = targetLoc.clone().add(0, 1.5, 0);
+        Location lookAt = targetLoc.clone();
+        lookAt.add(0, 1.5, 0);
         camLoc.setDirection(lookAt.toVector().subtract(camLoc.toVector()));
 
         return camLoc;
