@@ -7,7 +7,7 @@ A Minecraft Paper plugin that allows a designated player to act as a "Cinematic 
 ## Live Demo
 
 Check out the plugin in action on our 24/7 YouTube Live stream:
-[**Watch Live on YouTube**](https://youtube.com/live/MWFDWFQ1ZX0)
+[**Watch Live on YouTube**](https://www.youtube.com/live/uupyt3k9nTE)
 
 ## Features
 
