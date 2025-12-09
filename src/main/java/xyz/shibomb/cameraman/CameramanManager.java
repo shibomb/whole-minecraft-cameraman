@@ -41,6 +41,7 @@ public class CameramanManager {
     private long lastPlayerTargetTime = System.currentTimeMillis();
     private boolean teleportSmooth = false;
     private long teleportSmoothDuration = 3L; // Seconds
+    private double teleportSmoothSpeed;
     private SmoothTeleportTask currentTeleportTask;
     private SpectateState spectateMode = SpectateState.ENABLED;
     private SpectatePerspective spectatePerspective = SpectatePerspective.POV;
@@ -94,6 +95,7 @@ public class CameramanManager {
 
         this.teleportSmooth = plugin.getConfig().getBoolean("teleportSmooth", false);
         this.teleportSmoothDuration = plugin.getConfig().getLong("teleportSmoothDuration", 3L);
+        this.teleportSmoothSpeed = plugin.getConfig().getDouble("teleportSmoothSpeed", 50.0);
 
         String spectateModeStr = plugin.getConfig().getString("spectateMode", "true");
         this.spectateMode = parseSpectateState(spectateModeStr);
@@ -352,9 +354,16 @@ public class CameramanManager {
 
             if (teleportSmooth) {
                 sendInfoMessage(cameraman, "Moving to " + target.getName() + "...");
+
+                // Calculate duration based on distance and speed
+                double distanceToTarget = cameraman.getLocation().distance(target.getLocation());
+                double calculatedDuration = distanceToTarget / teleportSmoothSpeed;
+                // Ensure minimum duration
+                long finalDuration = (long) Math.max(teleportSmoothDuration, calculatedDuration);
+
                 CameraShot shot = createCameraShot(activePerspective, maxDist, maxHeight);
                 currentTeleportTask = new SmoothTeleportTask(cameraman, new EntityTarget(target),
-                        teleportSmoothDuration * 20L,
+                        finalDuration * 20L,
                         onTargetSet, shot);
                 currentTeleportTask.runTaskTimer(plugin, 0L, 1L);
             } else {

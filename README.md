@@ -38,7 +38,8 @@ Check out the plugin in action on our 24/7 YouTube Live stream:
 ### Spectating
 - `/cameraman spectatemode <true|false> [perspective]`: Enable/disable Spectate Mode for **players**. Optional perspective (default: RANDOM).
 - `/cameraman mobspectatemode <true|false> [perspective]`: Enable/disable Spectate Mode for **mobs**. Optional perspective (default: RANDOM).
-- `/cameraman teleportsmooth <true|false> [duration]`: Enable/disable Smooth Teleport (interpolate position when switching targets). Optional duration in seconds (default: 3s).
+- `/cameraman teleportsmooth <true|false> [duration]`: Enable/disable Smooth Teleport. Optional **minimum** duration in seconds (default: 3s).
+  - *Note: Actual duration adapts to distance based on `teleportSmoothSpeed` in config (Default: 50 blocks/s).*
 - `/cameraman mobnightvision <true|false>`: Enable/disable Mob Night Vision (Night Vision effect when targeting mobs).
 - `/cameraman nightvisionthreshold <0-15>`: Set threshold for Adaptive Night Vision (applied if light level <= value) (default: 7).
 
@@ -140,6 +141,7 @@ autoScenic: true
 autoScenicPerspective: RANDOM
 teleportSmooth: false
 teleportSmoothDuration: 3
+teleportSmoothSpeed: 50.0
 spectateMode: true
 spectatePerspective: RANDOM
 mobSpectateMode: true

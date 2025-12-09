@@ -31,10 +31,14 @@ autoScenic: true
 autoScenicPerspective: RANDOM
 
 # Teleport settings
+# If true, the camera will smoothly interpolate to the new target instead of instantly teleporting.
 teleportSmooth: false
 
 # The duration (in seconds) for Smooth Teleport.
 teleportSmoothDuration: 3
+# Speed (blocks per second) for smooth teleport. Used to calculate duration for long distances.
+# Duration = Distance / Speed. If calculated duration < teleportSmoothDuration, the fixed duration is used.
+teleportSmoothSpeed: 50.0
 
 # Whether Spectate Mode is enabled for players.
 spectateMode: true
