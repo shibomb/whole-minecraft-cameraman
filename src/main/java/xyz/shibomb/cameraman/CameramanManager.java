@@ -353,20 +353,28 @@ public class CameramanManager {
             };
 
             if (teleportSmooth) {
-                sendInfoMessage(cameraman, "Moving to " + target.getName() + "...");
+                // Check if in same world
+                if (cameraman.getWorld().equals(target.getLocation().getWorld())) {
+                    sendInfoMessage(cameraman, "Moving to " + target.getName() + "...");
 
-                // Calculate duration based on distance and speed
-                double distanceToTarget = cameraman.getLocation().distance(target.getLocation());
-                double calculatedDuration = distanceToTarget / teleportSmoothSpeed;
-                // Ensure minimum duration
-                long finalDuration = (long) Math.max(teleportSmoothDuration, calculatedDuration);
+                    // Calculate duration based on distance and speed
+                    double distanceToTarget = cameraman.getLocation().distance(target.getLocation());
+                    double calculatedDuration = distanceToTarget / teleportSmoothSpeed;
+                    // Ensure minimum duration
+                    long finalDuration = (long) Math.max(teleportSmoothDuration, calculatedDuration);
 
-                CameraShot shot = createCameraShot(activePerspective, maxDist, maxHeight);
-                currentTeleportTask = new SmoothTeleportTask(cameraman, new EntityTarget(target),
-                        finalDuration * 20L,
-                        onTargetSet, shot);
-                currentTeleportTask.runTaskTimer(plugin, 0L, 1L);
-            } else {
+                    CameraShot shot = createCameraShot(activePerspective, maxDist, maxHeight);
+                    currentTeleportTask = new SmoothTeleportTask(cameraman, new EntityTarget(target),
+                            finalDuration * 20L,
+                            onTargetSet, shot);
+                    currentTeleportTask.runTaskTimer(plugin, 0L, 1L);
+                    return; // Return early, don't execute "else"
+                }
+                // If different worlds, fall through to instant teleport
+            }
+
+            // "else" block effectively (if !teleportSmooth OR different worlds)
+            {
                 boolean activeSpectateMode = (target instanceof Player) ? resolveSpectateState(spectateMode)
                         : resolveSpectateState(mobSpectateMode);
                 if (activeSpectateMode) {
