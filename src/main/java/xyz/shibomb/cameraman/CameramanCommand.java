@@ -77,20 +77,34 @@ public class CameramanCommand implements CommandExecutor {
 
             case "rotation":
                 if (args.length < 2) {
-                    sender.sendMessage("Usage: /cameraman rotation <true/false> [interval]");
+                    sender.sendMessage("Usage: /cameraman rotation <true|false> [interval]");
                     return true;
                 }
-                boolean rotationMode = Boolean.parseBoolean(args[1]);
-                long interval = 10; // Default
+                boolean rotEnabled = Boolean.parseBoolean(args[1]);
+                long interval = 60L;
                 if (args.length >= 3) {
                     try {
                         interval = Long.parseLong(args[2]);
                     } catch (NumberFormatException e) {
-                        sender.sendMessage("Invalid interval. Using default 10s.");
+                        sender.sendMessage("Invalid interval (seconds). Using default 60s.");
                     }
                 }
-                manager.setRotationMode(rotationMode, interval);
-                sender.sendMessage("Rotation mode: " + rotationMode);
+                manager.setRotationMode(rotEnabled, interval);
+                sender.sendMessage("Rotation mode: " + rotEnabled); // Changed to rotEnabled for consistency
+                break;
+
+            case "minrotationdistance":
+                if (args.length < 2) {
+                    sender.sendMessage("Usage: /cameraman minrotationdistance <distance>");
+                    return true;
+                }
+                try {
+                    double dist = Double.parseDouble(args[1]);
+                    manager.setMinRotationDistance(Math.max(0.0, dist));
+                    sender.sendMessage("Minimum rotation distance set to: " + Math.max(0.0, dist));
+                } catch (NumberFormatException e) {
+                    sender.sendMessage("Invalid distance.");
+                }
                 break;
 
             case "mobtarget":

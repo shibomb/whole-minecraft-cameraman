@@ -31,7 +31,8 @@ Check out the plugin in action on our 24/7 YouTube Live stream:
 
 ### Targeting
 - `/cameraman newcomer <true|false>`: Enable/disable Newcomer Mode (auto-spectate newly joined players).
-- `/cameraman rotation <true|false> [interval]`: Enable/disable Rotation Mode (cycle targets). Optional interval in seconds (default: 60s).
+- `/cameraman rotation <true|false> [interval]`: Disable/Enable automatic rotation between targets. Optional interval in seconds (default: 60).
+- `/cameraman minrotationdistance <distance>`: Set minimum distance to skip close targets (default: 5.0).
 - `/cameraman mobtarget <true|false>`: Enable/disable Mob Target Mode (spectate mobs instead of players).
 - `/cameraman automob <true|false> [delay]`: Enable/disable Auto Mob Target (switch to mobs if no players). Optional delay in seconds (default: 60s).
 
@@ -134,6 +135,7 @@ cameraman: <UUID>
 newcomerMode: true
 rotationMode: true
 rotationInterval: 60
+minRotationDistance: 5.0
 mobTargetMode: false
 autoMobTarget: true
 autoMobTargetDelay: 60

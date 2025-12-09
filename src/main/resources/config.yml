@@ -12,8 +12,10 @@ newcomerMode: true
 # Whether Rotation Mode is enabled.
 rotationMode: true
 
-# The interval (in seconds) for Rotation Mode.
+# The# Interval in seconds for rotation.
 rotationInterval: 60
+# Minimum distance from current camera location to next target. Targets closer than this will be skipped during rotation.
+minRotationDistance: 5.0
 
 # Whether Mob Target Mode is enabled.
 mobTargetMode: false

@@ -35,6 +35,7 @@ public class CameramanManager {
     private boolean rotationMode = false;
     private RotationTask rotationTask;
     private long rotationInterval = 200L; // Default 10 seconds (20 ticks * 10)
+    private double minRotationDistance = 0.0;
     private boolean mobTargetMode = false;
     private boolean autoMobTarget = false;
     private long autoMobTargetDelay = 5L; // Seconds
@@ -88,6 +89,7 @@ public class CameramanManager {
         this.rotationMode = plugin.getConfig().getBoolean("rotationMode", false);
         long intervalSeconds = plugin.getConfig().getLong("rotationInterval", 60L);
         this.rotationInterval = intervalSeconds * 20L;
+        this.minRotationDistance = plugin.getConfig().getDouble("minRotationDistance", 0.0);
 
         this.mobTargetMode = plugin.getConfig().getBoolean("mobTargetMode", false);
         this.autoMobTarget = plugin.getConfig().getBoolean("autoMobTarget", false);
@@ -117,7 +119,6 @@ public class CameramanManager {
 
         this.mobNightVision = plugin.getConfig().getBoolean("mobNightVision", true);
         this.showMessage = plugin.getConfig().getBoolean("showMessage", true);
-        this.nightVisionThreshold = plugin.getConfig().getInt("nightVisionThreshold", 7);
         this.nightVisionThreshold = plugin.getConfig().getInt("nightVisionThreshold", 7);
         this.spectateDistance = plugin.getConfig().getString("spectateDistance", "3.0");
         this.spectateHeight = plugin.getConfig().getString("spectateHeight", "1.0");
@@ -893,6 +894,21 @@ public class CameramanManager {
         if (cameraman != null) {
             cameraman.sendMessage("Orbit Speed set to: " + speed);
         }
+    }
+
+    public void setMinRotationDistance(double distance) {
+        this.minRotationDistance = distance;
+        plugin.getConfig().set("minRotationDistance", distance);
+        plugin.saveConfig();
+
+        Player cameraman = getCameraman();
+        if (cameraman != null) {
+            cameraman.sendMessage("Min Rotation Distance set to: " + distance);
+        }
+    }
+
+    public double getMinRotationDistance() {
+        return minRotationDistance;
     }
 
     public void setOrbitDirection(String direction) {
