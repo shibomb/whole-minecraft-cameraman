@@ -17,3 +17,4 @@ xyz/shibomb/cameraman/CameramanManager.class
 xyz/shibomb/cameraman/shots/OrbitShot.class
 xyz/shibomb/cameraman/SmoothTeleportTask.class
 xyz/shibomb/cameraman/shots/MoveShot.class
+xyz/shibomb/cameraman/CameramanManager$SpectateState.class

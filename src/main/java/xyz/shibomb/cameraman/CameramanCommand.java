@@ -141,49 +141,49 @@ public class CameramanCommand implements CommandExecutor {
 
             case "spectatemode":
                 if (args.length < 2) {
-                    sender.sendMessage("Usage: /cameraman spectatemode <true/false> [perspective]");
+                    sender.sendMessage("Usage: /cameraman spectatemode <true/false/RANDOM> [perspective]");
                     return true;
                 }
-                boolean spectateMode = Boolean.parseBoolean(args[1]);
-                manager.setSpectateMode(spectateMode);
+                String spectateArg = args[1];
+                manager.setSpectateMode(spectateArg);
 
                 if (args.length >= 3) {
                     try {
                         SpectatePerspective perspective = SpectatePerspective.valueOf(args[2].toUpperCase());
                         manager.setSpectatePerspective(perspective);
                         sender.sendMessage(
-                                "Spectate Mode (Player): " + spectateMode + " (Perspective: " + perspective + ")");
+                                "Spectate Mode (Player): " + spectateArg + " (Perspective: " + perspective + ")");
                     } catch (IllegalArgumentException e) {
                         sender.sendMessage(
-                                "Invalid perspective. Available: POV, BEHIND, FRONT, RANDOM, ORBIT, DYNAMIC, FLYBY, CRANE");
-                        sender.sendMessage("Spectate Mode (Player): " + spectateMode);
+                                "Invalid perspective. Available: POV, BEHIND, FRONT, RANDOM, ORBIT, DYNAMIC, DYNAMIC_BEHIND, DYNAMIC_FRONT, DYNAMIC_POV, FLYBY, CRANE, FIX");
+                        sender.sendMessage("Spectate Mode (Player): " + spectateArg);
                     }
                 } else {
-                    sender.sendMessage("Spectate Mode (Player): " + spectateMode);
+                    sender.sendMessage("Spectate Mode (Player): " + spectateArg);
                 }
                 break;
 
             case "mobspectatemode":
                 if (args.length < 2) {
-                    sender.sendMessage("Usage: /cameraman mobspectatemode <true/false> [perspective]");
+                    sender.sendMessage("Usage: /cameraman mobspectatemode <true/false/RANDOM> [perspective]");
                     return true;
                 }
-                boolean mobSpectateMode = Boolean.parseBoolean(args[1]);
-                manager.setMobSpectateMode(mobSpectateMode);
+                String mobSpectateArg = args[1];
+                manager.setMobSpectateMode(mobSpectateArg);
 
                 if (args.length >= 3) {
                     try {
                         SpectatePerspective perspective = SpectatePerspective.valueOf(args[2].toUpperCase());
                         manager.setMobSpectatePerspective(perspective);
                         sender.sendMessage(
-                                "Spectate Mode (Mob): " + mobSpectateMode + " (Perspective: " + perspective + ")");
+                                "Spectate Mode (Mob): " + mobSpectateArg + " (Perspective: " + perspective + ")");
                     } catch (IllegalArgumentException e) {
                         sender.sendMessage(
-                                "Invalid perspective. Available: POV, BEHIND, FRONT, RANDOM, ORBIT, DYNAMIC, FLYBY, CRANE");
-                        sender.sendMessage("Spectate Mode (Mob): " + mobSpectateMode);
+                                "Invalid perspective. Available: POV, BEHIND, FRONT, RANDOM, ORBIT, DYNAMIC, DYNAMIC_BEHIND, DYNAMIC_FRONT, DYNAMIC_POV, FLYBY, CRANE, FIX");
+                        sender.sendMessage("Spectate Mode (Mob): " + mobSpectateArg);
                     }
                 } else {
-                    sender.sendMessage("Spectate Mode (Mob): " + mobSpectateMode);
+                    sender.sendMessage("Spectate Mode (Mob): " + mobSpectateArg);
                 }
                 break;
 

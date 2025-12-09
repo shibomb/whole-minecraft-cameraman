@@ -31,7 +31,7 @@ Check out the plugin in action on our 24/7 YouTube Live stream:
 
 ### Targeting
 - `/cameraman newcomer <true|false>`: Enable/disable Newcomer Mode (auto-spectate newly joined players).
-- `/cameraman rotation <true|false> [interval]`: Enable/disable Rotation Mode (cycle targets). Optional interval in seconds (default: 30s).
+- `/cameraman rotation <true|false> [interval]`: Enable/disable Rotation Mode (cycle targets). Optional interval in seconds (default: 60s).
 - `/cameraman mobtarget <true|false>`: Enable/disable Mob Target Mode (spectate mobs instead of players).
 - `/cameraman automob <true|false> [delay]`: Enable/disable Auto Mob Target (switch to mobs if no players). Optional delay in seconds (default: 60s).
 
@@ -59,7 +59,7 @@ Check out the plugin in action on our 24/7 YouTube Live stream:
 - `/cameraman orbitdirection <LEFT|RIGHT|RANDOM>`: Set direction (default: RANDOM).
 
 #### Dynamic
-- `/cameraman smoothness <value>`: Set smoothness (0.01 - 1.0) (default: 0.1).
+- `/cameraman smoothness <value>`: Set smoothness (0.01 - 1.0) (default: 0.05).
 
 #### Flyby
 - `/cameraman flybyduration <seconds>`: Set loop duration (default: 30.0).
@@ -95,13 +95,18 @@ This plugin offers various camera modes ("Perspectives") for spectating:
 - **ORBIT**: The camera circles around the target at a fixed distance.
   - Configurable via `distance` (radius), `height`, `orbitSpeed`, and `orbitDirection`.
 - **DYNAMIC**: A smooth "tracking" shot. The camera lags slightly behind the target (spring-arm effect), smoothing out sudden rotations and movements.
-  - Configurable via `distance`, `height`, and `dynamicSmoothness` (0.01-1.0).
+  - Configurable via `distance`, `height`, and `dynamicSmoothness` (0.01-1.0) (default: 0.05).
+  - Variations:
+    - **DYNAMIC_BEHIND**: Follows from behind (Classic dynamic behavior).
+    - **DYNAMIC_FRONT**: Follows from the front, looking back at the target.
+    - **DYNAMIC_POV**: Follows from the eye position (approximate First-Person) with smoothing.
 - **FLYBY**: The camera moves continuously between two points relative to the target (e.g., flying past them). Loops back and forth.
   - Configurable via `flybyDuration`.
 - **CRANE**: The camera moves vertically (up and down) while maintaining a fixed horizontal distance. Great for establishing shots.
   - Configurable via `distance`, `craneDuration`, `craneHeightMin`, and `craneHeightMax`.
 - **MOVE**: The camera moves linearly in a specified direction relative to the start orientation.
   - Configurable via `movedirection` (X=Right, Y=Up, Z=Forward), `movespeed`, `distance` (start offset back), and `height` (start offset up).
+- **FIX**: The camera remains static at the target location (plus height). Useful for Scenic Mode to create a tripod-like shot.
 - **RANDOM**: Automatically selects one of the above perspectives (including cinematic ones) at random each time a new target is chosen from the rotation list.
 
 > **Note**: If `spectatemode` or `mobspectatemode` is set to `false`, these perspectives will only teleport the cameraman to the **starting position** of the shot. Dynamic effects like orbiting or flying by require spectate mode to be enabled (true).
@@ -127,7 +132,7 @@ The `config.yml` stores the UUID of the current cameraman and all mode settings 
 cameraman: <UUID>
 newcomerMode: true
 rotationMode: true
-rotationInterval: 30
+rotationInterval: 60
 mobTargetMode: false
 autoMobTarget: true
 autoMobTargetDelay: 60
@@ -139,14 +144,14 @@ spectateMode: true
 spectatePerspective: RANDOM
 mobSpectateMode: true
 mobSpectatePerspective: RANDOM
-mobNightVision: false
+mobNightVision: true
 showMessage: true
 nightVisionThreshold: 7
 spectateDistance: "3.0-5.0"
 spectateHeight: "0.0-1.0"
 orbitSpeed: "0.1"
 orbitDirection: "RANDOM"
-dynamicSmoothness: "0.1"
+dynamicSmoothness: "0.05"
 flybyDuration: "30.0"
 craneDuration: "30.0"
 craneHeightMin: "1.0"
@@ -163,11 +168,15 @@ randomPlayerPerspectives:
   - FLYBY
   - MOVE
   - CRANE
+  - DYNAMIC_BEHIND
+  - DYNAMIC_FRONT
+  - DYNAMIC_POV
 randomScenicPerspectives:
   - ORBIT
   - FLYBY
   - MOVE
   - CRANE
+  - FIX
 randomMobPerspectives:
   - POV
   - BEHIND
@@ -175,4 +184,7 @@ randomMobPerspectives:
   - ORBIT
   - FLYBY
   - CRANE
+  - DYNAMIC_BEHIND
+  - DYNAMIC_FRONT
+  - DYNAMIC_POV
 ```

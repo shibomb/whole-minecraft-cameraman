@@ -25,6 +25,10 @@ import xyz.shibomb.cameraman.shots.MoveShot;
 
 public class CameramanManager {
 
+    public enum SpectateState {
+        ENABLED, DISABLED, RANDOM
+    }
+
     private final JavaPlugin plugin;
     private UUID cameramanId;
     private boolean newcomerMode = false;
@@ -38,9 +42,9 @@ public class CameramanManager {
     private boolean teleportSmooth = false;
     private long teleportSmoothDuration = 3L; // Seconds
     private SmoothTeleportTask currentTeleportTask;
-    private boolean spectateMode = true;
+    private SpectateState spectateMode = SpectateState.ENABLED;
     private SpectatePerspective spectatePerspective = SpectatePerspective.POV;
-    private boolean mobSpectateMode = true;
+    private SpectateState mobSpectateMode = SpectateState.ENABLED;
     private SpectatePerspective mobSpectatePerspective = SpectatePerspective.POV;
     private SpectateTask currentSpectateTask;
     private boolean mobNightVision = false;
@@ -81,41 +85,43 @@ public class CameramanManager {
 
         this.newcomerMode = plugin.getConfig().getBoolean("newcomerMode", false);
         this.rotationMode = plugin.getConfig().getBoolean("rotationMode", false);
-        long intervalSeconds = plugin.getConfig().getLong("rotationInterval", 10L);
+        long intervalSeconds = plugin.getConfig().getLong("rotationInterval", 60L);
         this.rotationInterval = intervalSeconds * 20L;
 
         this.mobTargetMode = plugin.getConfig().getBoolean("mobTargetMode", false);
         this.autoMobTarget = plugin.getConfig().getBoolean("autoMobTarget", false);
-        this.autoMobTargetDelay = plugin.getConfig().getLong("autoMobTargetDelay", 5L);
+        this.autoMobTargetDelay = plugin.getConfig().getLong("autoMobTargetDelay", 60L);
 
         this.teleportSmooth = plugin.getConfig().getBoolean("teleportSmooth", false);
         this.teleportSmoothDuration = plugin.getConfig().getLong("teleportSmoothDuration", 3L);
 
-        this.spectateMode = plugin.getConfig().getBoolean("spectateMode", true);
-        String perspectiveStr = plugin.getConfig().getString("spectatePerspective", "POV");
+        String spectateModeStr = plugin.getConfig().getString("spectateMode", "true");
+        this.spectateMode = parseSpectateState(spectateModeStr);
+        String perspectiveStr = plugin.getConfig().getString("spectatePerspective", "RANDOM");
         try {
             this.spectatePerspective = SpectatePerspective.valueOf(perspectiveStr.toUpperCase());
         } catch (IllegalArgumentException e) {
             this.spectatePerspective = SpectatePerspective.POV;
         }
 
-        this.mobSpectateMode = plugin.getConfig().getBoolean("mobSpectateMode", true);
-        String mobPerspectiveStr = plugin.getConfig().getString("mobSpectatePerspective", "POV");
+        String mobSpectateModeStr = plugin.getConfig().getString("mobSpectateMode", "true");
+        this.mobSpectateMode = parseSpectateState(mobSpectateModeStr);
+        String mobPerspectiveStr = plugin.getConfig().getString("mobSpectatePerspective", "RANDOM");
         try {
             this.mobSpectatePerspective = SpectatePerspective.valueOf(mobPerspectiveStr.toUpperCase());
         } catch (IllegalArgumentException e) {
             this.mobSpectatePerspective = SpectatePerspective.POV;
         }
 
-        this.mobNightVision = plugin.getConfig().getBoolean("mobNightVision", false);
+        this.mobNightVision = plugin.getConfig().getBoolean("mobNightVision", true);
         this.showMessage = plugin.getConfig().getBoolean("showMessage", true);
         this.nightVisionThreshold = plugin.getConfig().getInt("nightVisionThreshold", 7);
         this.nightVisionThreshold = plugin.getConfig().getInt("nightVisionThreshold", 7);
         this.spectateDistance = plugin.getConfig().getString("spectateDistance", "3.0");
         this.spectateHeight = plugin.getConfig().getString("spectateHeight", "1.0");
-        this.orbitSpeed = plugin.getConfig().getString("orbitSpeed", "0.2");
+        this.orbitSpeed = plugin.getConfig().getString("orbitSpeed", "0.1");
         this.orbitDirection = plugin.getConfig().getString("orbitDirection", "RANDOM");
-        this.dynamicSmoothness = plugin.getConfig().getString("dynamicSmoothness", "0.1");
+        this.dynamicSmoothness = plugin.getConfig().getString("dynamicSmoothness", "0.05");
         this.flybyDuration = plugin.getConfig().getString("flybyDuration", "30.0");
         this.craneDuration = plugin.getConfig().getString("craneDuration", "30.0");
         this.craneHeightMin = plugin.getConfig().getString("craneHeightMin", "1.0");
@@ -138,6 +144,18 @@ public class CameramanManager {
         checkAndStartRotationTask();
     }
 
+    private SpectateState parseSpectateState(String value) {
+        if (value.equalsIgnoreCase("true"))
+            return SpectateState.ENABLED;
+        if (value.equalsIgnoreCase("false"))
+            return SpectateState.DISABLED;
+        try {
+            return SpectateState.valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return SpectateState.ENABLED;
+        }
+    }
+
     private void loadRandomPerspectives() {
         randomPlayerPerspectives = loadPerspectiveList("randomPlayerPerspectives");
         randomMobPerspectives = loadPerspectiveList("randomMobPerspectives");
@@ -154,8 +172,12 @@ public class CameramanManager {
             defaults.add(SpectatePerspective.FRONT);
             defaults.add(SpectatePerspective.ORBIT);
             defaults.add(SpectatePerspective.DYNAMIC);
+            defaults.add(SpectatePerspective.DYNAMIC_BEHIND);
+            defaults.add(SpectatePerspective.DYNAMIC_FRONT);
+            defaults.add(SpectatePerspective.DYNAMIC_POV);
             defaults.add(SpectatePerspective.FLYBY);
             defaults.add(SpectatePerspective.CRANE);
+            defaults.add(SpectatePerspective.FIX);
             return defaults;
         }
         return list.stream().map(s -> {
@@ -296,9 +318,9 @@ public class CameramanManager {
             Runnable onTargetSet = () -> {
                 boolean activeSpectateMode;
                 if (target instanceof Player) {
-                    activeSpectateMode = spectateMode;
+                    activeSpectateMode = resolveSpectateState(spectateMode);
                 } else {
-                    activeSpectateMode = mobSpectateMode;
+                    activeSpectateMode = resolveSpectateState(mobSpectateMode);
                 }
 
                 if (activeSpectateMode) {
@@ -336,7 +358,8 @@ public class CameramanManager {
                         onTargetSet, shot);
                 currentTeleportTask.runTaskTimer(plugin, 0L, 1L);
             } else {
-                boolean activeSpectateMode = (target instanceof Player) ? spectateMode : mobSpectateMode;
+                boolean activeSpectateMode = (target instanceof Player) ? resolveSpectateState(spectateMode)
+                        : resolveSpectateState(mobSpectateMode);
                 if (activeSpectateMode) {
                     onTargetSet.run();
                 } else {
@@ -564,14 +587,37 @@ public class CameramanManager {
         }
     }
 
-    public void setSpectateMode(boolean enabled) {
-        this.spectateMode = enabled;
-        plugin.getConfig().set("spectateMode", enabled);
+    private boolean resolveSpectateState(SpectateState state) {
+        if (state == SpectateState.RANDOM) {
+            return new Random().nextBoolean();
+        }
+        return state == SpectateState.ENABLED;
+    }
+
+    public void setSpectateMode(String value) {
+        this.spectateMode = parseSpectateState(value);
+        plugin.getConfig().set("spectateMode", this.spectateMode.name()); // Save as name if enum, or maybe preserve
+                                                                          // true/false string?
+        // To maintain backward compatibility somewhat visually in config, we could save
+        // "true"/"false" for enabled/disabled
+        // But simplifying to enum names is cleaner. Let's start with enum names.
+        // Actually, if I want to support "true"/"false" inputs for command, I should
+        // handle saving.
+        // Let's just save the name or "true"/"false" if that's what was passed?
+        // For simplicity:
+        if (this.spectateMode == SpectateState.ENABLED)
+            plugin.getConfig().set("spectateMode", "true");
+        else if (this.spectateMode == SpectateState.DISABLED)
+            plugin.getConfig().set("spectateMode", "false");
+        else
+            plugin.getConfig().set("spectateMode", "RANDOM");
+
         plugin.saveConfig();
 
         Player cameraman = getCameraman();
         if (cameraman != null) {
-            cameraman.sendMessage("Spectate Mode set to: " + enabled);
+            cameraman.sendMessage("Spectate Mode set to: " + (this.spectateMode == SpectateState.RANDOM ? "RANDOM"
+                    : (this.spectateMode == SpectateState.ENABLED)));
         }
     }
 
@@ -586,14 +632,22 @@ public class CameramanManager {
         }
     }
 
-    public void setMobSpectateMode(boolean enabled) {
-        this.mobSpectateMode = enabled;
-        plugin.getConfig().set("mobSpectateMode", enabled);
+    public void setMobSpectateMode(String value) {
+        this.mobSpectateMode = parseSpectateState(value);
+        if (this.mobSpectateMode == SpectateState.ENABLED)
+            plugin.getConfig().set("mobSpectateMode", "true");
+        else if (this.mobSpectateMode == SpectateState.DISABLED)
+            plugin.getConfig().set("mobSpectateMode", "false");
+        else
+            plugin.getConfig().set("mobSpectateMode", "RANDOM");
+
         plugin.saveConfig();
 
         Player cameraman = getCameraman();
         if (cameraman != null) {
-            cameraman.sendMessage("Spectate Mode (Mob) set to: " + enabled);
+            cameraman.sendMessage(
+                    "Spectate Mode (Mob) set to: " + (this.mobSpectateMode == SpectateState.RANDOM ? "RANDOM"
+                            : (this.mobSpectateMode == SpectateState.ENABLED)));
         }
     }
 
@@ -696,9 +750,10 @@ public class CameramanManager {
             }
 
             return new OrbitShot(distance, speed, height);
-        } else if (perspective == SpectatePerspective.DYNAMIC) {
+        } else if (perspective == SpectatePerspective.DYNAMIC || perspective == SpectatePerspective.DYNAMIC_BEHIND
+                || perspective == SpectatePerspective.DYNAMIC_FRONT || perspective == SpectatePerspective.DYNAMIC_POV) {
             double smooth = Double.parseDouble(dynamicSmoothness);
-            return new DynamicFollowShot(distance, height, smooth);
+            return new DynamicFollowShot(distance, height, smooth, perspective);
         } else if (perspective == SpectatePerspective.FLYBY) {
             double dur = Double.parseDouble(flybyDuration);
             return new FlybyShot(dur);

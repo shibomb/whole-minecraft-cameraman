@@ -25,6 +25,16 @@ public class StaticShot implements CameraShot {
 
         Location camLoc;
 
+        if (perspective == SpectatePerspective.FIX) {
+            // FIX: Just return target location + height.
+            // For Scenic (LocationTarget), this keeps the original yaw/pitch.
+            // For EntityTarget, it keeps the entity's current location/yaw/pitch (which
+            // changes).
+            // But since this is mainly for Scenic, static behavior is desired.
+            camLoc = targetLoc.clone().add(0, height, 0);
+            return camLoc;
+        }
+
         if (perspective == SpectatePerspective.FRONT) {
             // In front: target + direction * distance
             camLoc = targetLoc.clone().add(direction.clone().multiply(distance));

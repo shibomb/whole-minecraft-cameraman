@@ -1,11 +1,11 @@
 name: Cameraman
-version: '1.0.1'
+version: '1.0.2'
 main: xyz.shibomb.cameraman.CameramanPlugin
 api-version: '1.20'
 commands:
   cameraman:
     description: Control the cameraman
-    usage: /<command> [set|unset|clear|teleportsmooth|showmessage|target|newcomer|rotation|spectatemode|mobtarget|automob|mobspectatemode|mobnightvision|nightvisionthreshold|distance|height|orbitspeed|orbitdirection|smoothness|flybyduration|craneduration|craneheightmin|craneheightmax|movedirection|movespeed|random|scenic|autoscenic]
+    usage: '/<command> [set|unset|clear|teleportsmooth|showmessage|target|newcomer|rotation|spectatemode|mobtarget|automob|mobspectatemode|mobnightvision|nightvisionthreshold|distance|height|orbitspeed|orbitdirection|smoothness|flybyduration|craneduration|craneheightmin|craneheightmax|movedirection|movespeed|random|scenic|autoscenic] (Available perspectives: POV, BEHIND, FRONT, RANDOM, ORBIT, DYNAMIC, DYNAMIC_BEHIND, DYNAMIC_FRONT, DYNAMIC_POV, FLYBY, CRANE, FIX)'
     permission: cameraman.use
 permissions:
   cameraman.use:
