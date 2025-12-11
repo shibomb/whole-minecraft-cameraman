@@ -1,5 +1,5 @@
 name: Cameraman
-version: '1.0.2'
+version: '1.0.3'
 main: xyz.shibomb.cameraman.CameramanPlugin
 api-version: '1.20'
 commands:
